@@ -38,8 +38,8 @@
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 217 91% 60%;
 
     --radius: 0.5rem;
@@ -90,8 +90,8 @@
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 217 91% 60%;
 
     --text-primary: 0 0% 100%;

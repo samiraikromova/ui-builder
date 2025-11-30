@@ -39,14 +39,14 @@ export function ModelSelector({ selected, onChange }: ModelSelectorProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 transition-colors hover:bg-surface-hover"
+        className="flex items-center gap-1 rounded-full px-3 py-2 text-sm transition-colors hover:bg-surface-hover"
       >
-        <span className="text-sm text-foreground">{selectedModel.name}</span>
+        <span className="text-foreground">{selectedModel.name}</span>
         <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-48 rounded-lg border border-border bg-popover shadow-xl">
+        <div className="absolute bottom-full right-0 mb-2 w-48 rounded-2xl border border-border bg-popover p-2 shadow-xl">
           {models.map((model) => (
             <button
               key={model.id}
@@ -55,7 +55,7 @@ export function ModelSelector({ selected, onChange }: ModelSelectorProps) {
                 setOpen(false);
               }}
               className={cn(
-                "flex w-full flex-col px-4 py-2.5 text-left transition-colors hover:bg-surface-hover first:rounded-t-lg last:rounded-b-lg",
+                "flex w-full flex-col rounded-xl px-3 py-2 text-left transition-colors hover:bg-surface-hover",
                 selected === model.id && "bg-surface-hover"
               )}
             >

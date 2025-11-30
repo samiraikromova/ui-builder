@@ -1,15 +1,61 @@
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Paperclip } from "lucide-react";
+import { Send, Paperclip, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { Project } from "./ChatHeader";
+import { ProjectSelector } from "./ProjectSelector";
+import { ModelSelector } from "./ModelSelector";
+import { ExtendedThinkingToggle } from "./ExtendedThinkingToggle";
+
+const mockProjects: Project[] = [
+  {
+    id: "cb4",
+    name: "CB4 (Cam's Brain)",
+    icon: "🧠",
+    description: "Vector search integration with personal knowledge base",
+  },
+  {
+    id: "contract",
+    name: "Contract Writer",
+    icon: "📄",
+    description: "Generate professional contracts and legal documents",
+  },
+  {
+    id: "ad-writing",
+    name: "Ad Writing",
+    icon: "📢",
+    description: "Create compelling ad copy for various platforms",
+  },
+  {
+    id: "sales-review",
+    name: "Sales Call Review",
+    icon: "📞",
+    description: "Analyze and summarize sales call transcripts",
+  },
+];
 
 interface ChatInputProps {
   onSendMessage: (content: string, files?: File[]) => void;
   disabled?: boolean;
+  selectedProject: Project | null;
+  onSelectProject: (project: Project) => void;
+  selectedModel: string;
+  onSelectModel: (modelId: string) => void;
+  extendedThinking: boolean;
+  onToggleExtendedThinking: () => void;
 }
 
-export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
+export function ChatInput({ 
+  onSendMessage, 
+  disabled,
+  selectedProject,
+  onSelectProject,
+  selectedModel,
+  onSelectModel,
+  extendedThinking,
+  onToggleExtendedThinking 
+}: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -40,71 +86,97 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t border-border bg-surface p-4">
-      <div className="mx-auto max-w-3xl">
-        {files.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2">
-            {files.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 rounded-md bg-surface-hover px-3 py-1.5 text-xs text-foreground"
+    <div className="border-t border-border/50 bg-background p-6">
+      <div className="mx-auto max-w-4xl">
+        <div className="relative rounded-3xl border border-border/50 bg-surface shadow-lg">
+          <div className="flex items-end gap-2 p-3">
+            {/* Left controls */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={disabled}
               >
-                <Paperclip className="h-3 w-3" />
-                <span className="max-w-[200px] truncate">{file.name}</span>
-                <button
-                  onClick={() => setFiles(files.filter((_, i) => i !== index))}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+                <Paperclip className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileSelect}
+                accept="*/*"
+              />
+              <ProjectSelector
+                projects={mockProjects}
+                selected={selectedProject}
+                onChange={onSelectProject}
+              />
+            </div>
+
+            {/* Center input */}
+            <div className="flex-1">
+              {files.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-2 px-2">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs text-foreground"
+                    >
+                      <Paperclip className="h-3 w-3" />
+                      <span className="max-w-[200px] truncate">{file.name}</span>
+                      <button
+                        onClick={() => setFiles(files.filter((_, i) => i !== index))}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Textarea
+                ref={textareaRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter a prompt"
+                className="min-h-[48px] max-h-[200px] resize-none border-0 bg-transparent px-4 py-3 text-base focus-visible:ring-0 placeholder:text-muted-foreground"
+                disabled={disabled}
+              />
+            </div>
+
+            {/* Right controls */}
+            <div className="flex items-center gap-1">
+              <ExtendedThinkingToggle
+                enabled={extendedThinking}
+                onToggle={onToggleExtendedThinking}
+              />
+              <ModelSelector selected={selectedModel} onChange={onSelectModel} />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover"
+                disabled={disabled}
+              >
+                <Mic className="h-5 w-5 text-muted-foreground" />
+              </Button>
+              <Button
+                size="icon"
+                className={cn(
+                  "h-10 w-10 shrink-0 rounded-full",
+                  message.trim() ? "bg-accent text-accent-foreground hover:bg-accent-hover" : "opacity-50"
+                )}
+                onClick={handleSend}
+                disabled={!message.trim() || disabled}
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-        )}
-        <div className="flex items-end gap-2">
-          <div className="flex-1 rounded-lg border border-border bg-background">
-            <Textarea
-              ref={textareaRef}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
-              className="min-h-[60px] max-h-[200px] resize-none border-0 bg-transparent px-4 py-3 text-sm focus-visible:ring-0"
-              disabled={disabled}
-            />
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={handleFileSelect}
-            accept="*/*"
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-[60px] w-[60px] shrink-0 border-border"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={disabled}
-          >
-            <Paperclip className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            className={cn(
-              "h-[60px] w-[60px] shrink-0",
-              message.trim() ? "bg-primary text-primary-foreground hover:bg-accent-hover" : ""
-            )}
-            onClick={handleSend}
-            disabled={!message.trim() || disabled}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
         </div>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Press Enter to send, Shift+Enter for new line
-        </p>
       </div>
     </div>
   );

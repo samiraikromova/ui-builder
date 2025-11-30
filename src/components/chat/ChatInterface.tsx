@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
+import { EmptyState } from "./EmptyState";
+import { Project } from "./ChatHeader";
 
 interface Message {
   id: string;
@@ -47,6 +48,9 @@ const mockMessages: Record<string, Message[]> = {
 export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5");
+  const [extendedThinking, setExtendedThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,12 +95,29 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
     }, 1000);
   };
 
+  const isEmpty = messages.length === 0;
+
   return (
     <div className="flex h-full flex-1 flex-col">
-      <ChatHeader />
-      <MessageList messages={messages} isStreaming={isStreaming} />
+      {isEmpty ? (
+        <EmptyState 
+          selectedProject={selectedProject}
+          onSelectProject={setSelectedProject}
+        />
+      ) : (
+        <MessageList messages={messages} isStreaming={isStreaming} />
+      )}
       <div ref={messagesEndRef} />
-      <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} />
+      <ChatInput 
+        onSendMessage={handleSendMessage} 
+        disabled={isStreaming}
+        selectedProject={selectedProject}
+        onSelectProject={setSelectedProject}
+        selectedModel={selectedModel}
+        onSelectModel={setSelectedModel}
+        extendedThinking={extendedThinking}
+        onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)}
+      />
     </div>
   );
 }
