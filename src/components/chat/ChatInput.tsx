@@ -25,7 +25,7 @@ const mockProjects: Project[] = [{
   description: "Generate professional contracts and legal documents"
 }, {
   id: "sales-review",
-  name: "Sales Call Transcript Review",
+  name: "Sales Call Review",
   icon: "📞",
   description: "Analyze and summarize sales call transcripts"
 }, {
