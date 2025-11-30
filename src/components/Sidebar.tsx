@@ -221,18 +221,18 @@ export function Sidebar({
 
                 <CollapsibleContent>
                   <div className="ml-4 space-y-0.5">
-                    {folderChats.map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors">
+                    {folderChats.map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
                         {editingChatId === chat.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
                     if (e.key === "Enter") saveChatRename(chat.id);
                     if (e.key === "Escape") cancelChatRename();
                   }} onBlur={() => saveChatRename(chat.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                            <Button variant="ghost" size="sm" onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs", currentChatId === chat.id ? "bg-accent/10 text-accent hover:bg-accent/20" : "text-muted-foreground hover:text-foreground hover:bg-surface-hover")}>
-                              {chat.starred && <Star className="mr-1 h-3 w-3 fill-accent text-accent" />}
+                            <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs text-left px-2 py-1.5", currentChatId === chat.id ? "text-accent font-medium" : "text-muted-foreground")}>
+                              {chat.starred && <Star className="mr-1 h-3 w-3 fill-accent text-accent inline-block" />}
                               {chat.title}
-                            </Button>
+                            </button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                                 <MoreVertical className="h-3 w-3 text-muted-foreground" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -274,18 +274,18 @@ export function Sidebar({
               {!isCollapsed && <div className="flex items-center justify-between px-2 py-1.5">
                   <div className="text-xs font-medium text-muted-foreground">Favorites</div>
                 </div>}
-              {filterChats(getStarredChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors">
+              {filterChats(getStarredChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
                   {editingChatId === chat.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
               if (e.key === "Enter") saveChatRename(chat.id);
               if (e.key === "Escape") cancelChatRename();
             }} onBlur={() => saveChatRename(chat.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                    <Button variant="ghost" size="sm" onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs", currentChatId === chat.id ? "bg-accent/10 text-accent hover:bg-accent/20" : "text-muted-foreground hover:text-foreground hover:bg-surface-hover")}>
-                      <Star className="mr-1 h-3 w-3 fill-accent text-accent" />
+                    <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs text-left px-2 py-1.5", currentChatId === chat.id ? "text-accent font-medium" : "text-muted-foreground")}>
+                      <Star className="mr-1 h-3 w-3 fill-accent text-accent inline-block" />
                       {chat.title}
-                    </Button>
+                    </button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                           <MoreVertical className="h-3 w-3 text-muted-foreground" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -327,17 +327,17 @@ export function Sidebar({
                   <FolderPlus className="h-4 w-4" />
                 </Button>
               </div>}
-            {filterChats(getUncategorizedChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors">
+            {filterChats(getUncategorizedChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
                 {editingChatId === chat.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
               if (e.key === "Enter") saveChatRename(chat.id);
               if (e.key === "Escape") cancelChatRename();
             }} onBlur={() => saveChatRename(chat.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                    <Button variant="ghost" size="sm" onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs", currentChatId === chat.id ? "bg-accent/10 text-accent hover:bg-accent/20" : "text-muted-foreground hover:text-foreground")}>
+                    <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs text-left px-2 py-1.5", currentChatId === chat.id ? "text-accent font-medium" : "text-muted-foreground")}>
                       {chat.title}
-                    </Button>
+                    </button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <MoreVertical className="h-3 w-3 text-muted-foreground" />
                       </Button>
                     </DropdownMenuTrigger>
