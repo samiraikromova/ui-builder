@@ -1,5 +1,5 @@
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Plus, Sparkles } from "lucide-react";
+import { ArrowUp, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -15,10 +15,22 @@ const mockProjects: Project[] = [
     description: "Vector search integration with personal knowledge base",
   },
   {
+    id: "copywriting",
+    name: "Copywriting Assistant",
+    icon: "✍️",
+    description: "Generate engaging copy for marketing materials",
+  },
+  {
     id: "contract",
     name: "Contract Writer",
     icon: "📄",
     description: "Generate professional contracts and legal documents",
+  },
+  {
+    id: "sales-review",
+    name: "Sales Call Transcript Review",
+    icon: "📞",
+    description: "Analyze and summarize sales call transcripts",
   },
   {
     id: "ad-writing",
@@ -27,10 +39,22 @@ const mockProjects: Project[] = [
     description: "Create compelling ad copy for various platforms",
   },
   {
-    id: "sales-review",
-    name: "Sales Call Review",
-    icon: "📞",
-    description: "Analyze and summarize sales call transcripts",
+    id: "image-gen",
+    name: "Image Ad Generator",
+    icon: "🎨",
+    description: "Generate images for advertisements",
+  },
+  {
+    id: "hooks",
+    name: "AI Hooks Generator",
+    icon: "🎣",
+    description: "Create attention-grabbing hooks for content",
+  },
+  {
+    id: "documentation",
+    name: "Documentation",
+    icon: "📚",
+    description: "Generate and manage technical documentation",
   },
 ];
 
@@ -155,8 +179,8 @@ export function ChatInput({
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover",
-                  extendedThinking && "text-accent"
+                  "h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover transition-colors",
+                  extendedThinking ? "text-accent" : "text-muted-foreground"
                 )}
                 onClick={onToggleExtendedThinking}
                 disabled={disabled}
@@ -176,7 +200,7 @@ export function ChatInput({
               <Button
                 size="icon"
                 className={cn(
-                  "h-10 w-10 shrink-0 rounded-full transition-all",
+                  "h-10 w-10 shrink-0 rounded-full transition-all flex items-center justify-center",
                   hasContent 
                     ? "bg-accent text-accent-foreground hover:bg-accent-hover shadow-lg" 
                     : "bg-surface-hover text-muted-foreground"
@@ -184,7 +208,7 @@ export function ChatInput({
                 onClick={handleSend}
                 disabled={!message.trim() || disabled}
               >
-                <Send className="h-5 w-5" />
+                <ArrowUp className="h-5 w-5" />
               </Button>
             </div>
           </div>

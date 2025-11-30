@@ -18,10 +18,22 @@ const mockProjects: Project[] = [
     description: "Vector search integration with personal knowledge base",
   },
   {
+    id: "copywriting",
+    name: "Copywriting Assistant",
+    icon: "✍️",
+    description: "Generate engaging copy for marketing materials",
+  },
+  {
     id: "contract",
     name: "Contract Writer",
     icon: "📄",
     description: "Generate professional contracts and legal documents",
+  },
+  {
+    id: "sales-review",
+    name: "Sales Call Transcript Review",
+    icon: "📞",
+    description: "Analyze and summarize sales call transcripts",
   },
   {
     id: "ad-writing",
@@ -30,16 +42,10 @@ const mockProjects: Project[] = [
     description: "Create compelling ad copy for various platforms",
   },
   {
-    id: "sales-review",
-    name: "Sales Call Review",
-    icon: "📞",
-    description: "Analyze and summarize sales call transcripts",
-  },
-  {
-    id: "copywriting",
-    name: "Copywriting Assistant",
-    icon: "✍️",
-    description: "Generate engaging copy for marketing materials",
+    id: "image-gen",
+    name: "Image Ad Generator",
+    icon: "🎨",
+    description: "Generate images for advertisements",
   },
   {
     id: "hooks",
@@ -48,16 +54,16 @@ const mockProjects: Project[] = [
     description: "Create attention-grabbing hooks for content",
   },
   {
-    id: "image-gen",
-    name: "Image Ad Generator",
-    icon: "🎨",
-    description: "Generate images for advertisements using Ideogram v3",
+    id: "documentation",
+    name: "Documentation",
+    icon: "📚",
+    description: "Generate and manage technical documentation",
   },
 ];
 
 export function ChatHeader() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(mockProjects[0]);
-  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState("claude-opus-4");
   const [extendedThinking, setExtendedThinking] = useState(false);
 
   return (

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Wrench, X } from "lucide-react";
+import { ChevronDown, Sliders, X } from "lucide-react";
 import { Project } from "./ChatHeader";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,8 @@ export function ProjectSelector({ projects, selected, onChange }: ProjectSelecto
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-colors hover:bg-surface-hover"
       >
-        <Wrench className="h-4 w-4 text-muted-foreground" />
+        <Sliders className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Tools</span>
         <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 
