@@ -130,24 +130,44 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
 
 export function Message({ message }: MessageProps) {
   const isUser = message.role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="flex max-w-[80%] flex-col items-end">
+        <div className="group flex max-w-[80%] flex-col items-end">
           <div className="rounded-2xl bg-surface px-4 py-3">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
               {message.content}
             </p>
           </div>
-          <span className="mt-1 text-xs text-muted-foreground">{message.timestamp}</span>
+          <div className="mt-1 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+            <button
+              onClick={handleCopy}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Copy message"
+            >
+              {copied ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="group flex flex-col">
       <div className="markdown-content w-full">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -170,7 +190,20 @@ export function Message({ message }: MessageProps) {
           {message.content}
         </ReactMarkdown>
       </div>
-      <span className="mt-1 text-xs text-muted-foreground">{message.timestamp}</span>
+      <div className="mt-1 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-xs text-muted-foreground">{message.timestamp}</span>
+        <button
+          onClick={handleCopy}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Copy message"
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
