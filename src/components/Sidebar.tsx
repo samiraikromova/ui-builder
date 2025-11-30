@@ -159,10 +159,6 @@ export function Sidebar({
             <Search className="h-5 w-5" />
           </Button>
           
-          <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-foreground">
-            Leveraged Creator
-          </div>
-          
           <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover ml-auto">
             <PanelLeft className="h-5 w-5" />
             </Button>

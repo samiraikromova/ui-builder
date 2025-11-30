@@ -30,13 +30,13 @@ export function ProjectSelector({
         <Tooltip>
           <TooltipTrigger asChild>
             <button onClick={() => setOpen(!open)} className={cn(
-              "h-8 px-1.5 rounded-lg border flex items-center justify-center transition-all",
+              "h-8 px-1.5 rounded-lg border flex items-center justify-center transition-all duration-300 ease-in-out",
               selected 
                 ? "min-w-8 gap-2 border-accent bg-surface text-muted-foreground pr-2.5" 
                 : "min-w-8 border-border/30 text-muted-foreground hover:text-accent"
             )}>
               <Zap className="h-4 w-4" />
-              {selected && <span className="text-xs whitespace-nowrap">{selected.name}</span>}
+              {selected && <span className="text-xs whitespace-nowrap animate-fade-in">{selected.name}</span>}
               {selected && <button onClick={e => {
                 e.stopPropagation();
                 onChange(null);
