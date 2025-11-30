@@ -1,21 +1,14 @@
 import { useState } from "react";
-import { PanelLeft, Plus, FolderPlus, Settings, CreditCard, User, LogOut, MoreVertical, Star, Search, ChevronDown, UserIcon, Sparkles, Trash2, Pencil, X } from "lucide-react";
+import { PanelLeft, Plus, Settings, CreditCard, User, LogOut, MoreVertical, Star, Search, UserIcon, Sparkles, Trash2, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@/components/ui/dropdown-menu";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 interface Chat {
   id: string;
   title: string;
-  folderId?: string | null;
   starred: boolean;
-}
-interface Folder {
-  id: string;
-  name: string;
-  isOpen: boolean;
 }
 interface SidebarProps {
   currentChatId: string | null;
@@ -31,30 +24,17 @@ export function Sidebar({
   const [chats, setChats] = useState<Chat[]>([{
     id: "1",
     title: "Marketing campaign ideas",
-    folderId: null,
     starred: false
   }, {
     id: "2",
     title: "Video script review",
-    folderId: null,
     starred: false
   }, {
     id: "3",
     title: "Product description help",
-    folderId: null,
     starred: false
   }]);
-  const [folders, setFolders] = useState<Folder[]>([{
-    id: "work",
-    name: "Work",
-    isOpen: true
-  }, {
-    id: "personal",
-    name: "Personal",
-    isOpen: false
-  }]);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
-  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -82,67 +62,14 @@ export function Sidebar({
   const handleDeleteChat = (chatId: string) => {
     setChats(chats.filter(chat => chat.id !== chatId));
   };
-  const handleMoveToFolder = (chatId: string, folderId: string | null) => {
-    setChats(chats.map(chat => chat.id === chatId ? {
-      ...chat,
-      folderId
-    } : chat));
-  };
   const handleStarChat = (chatId: string) => {
     setChats(chats.map(chat => chat.id === chatId ? {
       ...chat,
       starred: !chat.starred
     } : chat));
   };
-  const handleCreateFolder = () => {
-    const newFolder: Folder = {
-      id: `folder-${Date.now()}`,
-      name: "New Folder",
-      isOpen: true
-    };
-    setFolders([...folders, newFolder]);
-    setEditingFolderId(newFolder.id);
-    setEditValue(newFolder.name);
-  };
-  const handleRenameFolder = (folderId: string) => {
-    const folder = folders.find(f => f.id === folderId);
-    if (folder) {
-      setEditingFolderId(folderId);
-      setEditValue(folder.name);
-    }
-  };
-  const saveFolderRename = (folderId: string) => {
-    if (editValue.trim()) {
-      setFolders(folders.map(folder => folder.id === folderId ? {
-        ...folder,
-        name: editValue.trim()
-      } : folder));
-    }
-    setEditingFolderId(null);
-    setEditValue("");
-  };
-  const cancelFolderRename = () => {
-    setEditingFolderId(null);
-    setEditValue("");
-  };
-  const handleDeleteFolder = (folderId: string) => {
-    setChats(chats.map(chat => chat.folderId === folderId ? {
-      ...chat,
-      folderId: null
-    } : chat));
-    setFolders(folders.filter(folder => folder.id !== folderId));
-  };
-  const toggleFolder = (folderId: string) => {
-    setFolders(folders.map(folder => folder.id === folderId ? {
-      ...folder,
-      isOpen: !folder.isOpen
-    } : folder));
-  };
-  const getChatsInFolder = (folderId: string) => {
-    return chats.filter(chat => chat.folderId === folderId);
-  };
-  const getUncategorizedChats = () => {
-    return chats.filter(chat => !chat.folderId && !chat.starred);
+  const getRecentChats = () => {
+    return chats.filter(chat => !chat.starred);
   };
   const getStarredChats = () => {
     return chats.filter(chat => chat.starred);
@@ -181,90 +108,6 @@ export function Sidebar({
       {!isCollapsed && (
         <ScrollArea className="flex-1">
           <div className="space-y-1 p-2">
-          {/* Folders */}
-          {folders.map(folder => {
-          const folderChats = filterChats(getChatsInFolder(folder.id));
-          if (folderChats.length === 0 && searchQuery) return null;
-          return <Collapsible key={folder.id} open={folder.isOpen} onOpenChange={() => toggleFolder(folder.id)}>
-                <div className="group flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
-                  {editingFolderId === folder.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
-                if (e.key === "Enter") saveFolderRename(folder.id);
-                if (e.key === "Escape") cancelFolderRename();
-              }} onBlur={() => saveFolderRename(folder.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                    <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs text-muted-foreground">
-                      <ChevronDown className={cn("h-3 w-3 transition-transform", !folder.isOpen && "-rotate-90")} />
-                      <span>{folder.name}</span>
-                    </CollapsibleTrigger>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent">
-                          <MoreVertical className="h-3 w-3 text-muted-foreground" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleRenameFolder(folder.id)}>
-                            <Pencil className="mr-2 h-3 w-3" />
-                            Rename
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteFolder(folder.id)}>
-                            <Trash2 className="mr-2 h-3 w-3" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </>}
-                </div>
-
-                <CollapsibleContent>
-                  <div className="ml-4 space-y-0.5">
-                    {folderChats.map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
-                        {editingChatId === chat.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
-                    if (e.key === "Enter") saveChatRename(chat.id);
-                    if (e.key === "Escape") cancelChatRename();
-                  }} onBlur={() => saveChatRename(chat.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                            <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs text-left px-2 py-1.5", currentChatId === chat.id ? "text-accent font-medium" : "text-muted-foreground")}>
-                              {chat.starred && <Star className="mr-1 h-3 w-3 fill-accent text-accent inline-block align-middle" />}
-                              {chat.title}
-                            </button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hover:bg-transparent">
-                                <MoreVertical className="h-3 w-3 text-muted-foreground" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
-                                  <Star className="mr-2 h-3 w-3" />
-                                  {chat.starred ? "Unstar" : "Star"}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRenameChat(chat.id)}>
-                                  <Pencil className="mr-2 h-3 w-3" />
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)}>
-                                  <Trash2 className="mr-2 h-3 w-3" />
-                                  Delete
-                                </DropdownMenuItem>
-                                <DropdownMenuSub>
-                                  <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
-                                  <DropdownMenuSubContent>
-                                    {chat.folderId && <DropdownMenuItem onClick={() => handleMoveToFolder(chat.id, null)}>
-                                        Remove from folder
-                                      </DropdownMenuItem>}
-                                    {folders.filter(f => f.id !== chat.folderId).map(f => <DropdownMenuItem key={f.id} onClick={() => handleMoveToFolder(chat.id, f.id)}>
-                                          {f.name}
-                                        </DropdownMenuItem>)}
-                                  </DropdownMenuSubContent>
-                                </DropdownMenuSub>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </>}
-                      </div>)}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>;
-        })}
-
           {/* Favorites Chats */}
           {getStarredChats().length > 0 && <div className="space-y-0.5">
               {!isCollapsed && <div className="flex items-center justify-between px-2 py-1.5">
@@ -298,32 +141,18 @@ export function Sidebar({
                             <Trash2 className="mr-2 h-3 w-3" />
                             Delete
                           </DropdownMenuItem>
-                          <DropdownMenuSub>
-                            <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                              {chat.folderId && <DropdownMenuItem onClick={() => handleMoveToFolder(chat.id, null)}>
-                                  Remove from folder
-                                </DropdownMenuItem>}
-                              {folders.filter(f => f.id !== chat.folderId).map(f => <DropdownMenuItem key={f.id} onClick={() => handleMoveToFolder(chat.id, f.id)}>
-                                    {f.name}
-                                  </DropdownMenuItem>)}
-                            </DropdownMenuSubContent>
-                          </DropdownMenuSub>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </>}
                 </div>)}
             </div>}
 
-          {/* Uncategorized Chats */}
+          {/* Recent Chats */}
           <div className="space-y-0.5">
             {!isCollapsed && <div className="flex items-center justify-between px-2 py-1.5">
                 <div className="text-xs font-medium text-muted-foreground">Recent</div>
-                <Button variant="ghost" size="icon" onClick={handleCreateFolder} className="h-6 w-6 text-muted-foreground hover:bg-surface-hover" title="New Folder">
-                  <FolderPlus className="h-4 w-4" />
-                </Button>
               </div>}
-            {filterChats(getUncategorizedChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
+            {filterChats(getRecentChats()).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors px-1">
                 {editingChatId === chat.id ? <input type="text" value={editValue} onChange={e => setEditValue(e.target.value)} onKeyDown={e => {
               if (e.key === "Enter") saveChatRename(chat.id);
               if (e.key === "Escape") cancelChatRename();
@@ -350,14 +179,6 @@ export function Sidebar({
                           <Trash2 className="mr-2 h-3 w-3" />
                           Delete
                         </DropdownMenuItem>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent>
-                            {folders.map(f => <DropdownMenuItem key={f.id} onClick={() => handleMoveToFolder(chat.id, f.id)}>
-                                {f.name}
-                              </DropdownMenuItem>)}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </>}
@@ -425,7 +246,7 @@ export function Sidebar({
           </div>
           <ScrollArea className="max-h-96">
             <div className="space-y-1">
-              {filterChats([...getStarredChats(), ...folders.flatMap(f => getChatsInFolder(f.id)), ...getUncategorizedChats()]).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors p-2 cursor-pointer" onClick={() => {
+              {filterChats([...getStarredChats(), ...getRecentChats()]).map(chat => <div key={chat.id} className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors p-2 cursor-pointer" onClick={() => {
               onChatSelect(chat.id);
               setIsSearchModalOpen(false);
               setSearchQuery("");
@@ -435,12 +256,9 @@ export function Sidebar({
                       {chat.starred && <Star className="h-3 w-3 fill-accent text-accent" />}
                       <span className="text-sm text-foreground">{chat.title}</span>
                     </div>
-                    {chat.folderId && <span className="text-xs text-muted-foreground">
-                        {folders.find(f => f.id === chat.folderId)?.name}
-                      </span>}
                   </div>
                 </div>)}
-              {filterChats([...getStarredChats(), ...folders.flatMap(f => getChatsInFolder(f.id)), ...getUncategorizedChats()]).length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">
+              {filterChats([...getStarredChats(), ...getRecentChats()]).length === 0 && <div className="text-center py-8 text-muted-foreground text-sm">
                   No chats found
                 </div>}
             </div>
