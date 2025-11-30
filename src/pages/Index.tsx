@@ -89,12 +89,6 @@ const Index = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <ModeSwitcher 
-        currentMode={mode} 
-        onModeChange={setMode}
-        sidebarCollapsed={mode === "chat" ? chatSidebarCollapsed : learnSidebarCollapsed}
-      />
-      
       {mode === "chat" ? (
         <>
           <Sidebar 
@@ -105,6 +99,8 @@ const Index = () => {
             setChats={setChats}
             isCollapsed={chatSidebarCollapsed}
             onCollapsedChange={setChatSidebarCollapsed}
+            mode={mode}
+            onModeChange={setMode}
           />
           <ChatInterface 
             chatId={chatId} 
@@ -122,6 +118,8 @@ const Index = () => {
             modules={modules}
             isCollapsed={learnSidebarCollapsed}
             onCollapsedChange={setLearnSidebarCollapsed}
+            mode={mode}
+            onModeChange={setMode}
           />
           <LearnInterface
             lessonId={lessonId}

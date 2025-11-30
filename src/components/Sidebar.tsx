@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PanelLeft, Plus, CreditCard, User, LogOut, MoreVertical, Star, Search, UserIcon, Sparkles, Trash2, Pencil, X, ChevronUp } from "lucide-react";
+import { ModeSwitcher } from "@/components/ModeSwitcher";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,6 +19,8 @@ interface SidebarProps {
   setChats: (chats: Chat[]) => void;
   isCollapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
+  mode: "chat" | "learn";
+  onModeChange: (mode: "chat" | "learn") => void;
 }
 export function Sidebar({
   currentChatId,
@@ -26,7 +29,9 @@ export function Sidebar({
   chats,
   setChats,
   isCollapsed,
-  onCollapsedChange
+  onCollapsedChange,
+  mode,
+  onModeChange
 }: SidebarProps) {
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -74,11 +79,13 @@ export function Sidebar({
   };
   return <div className={cn("flex h-full flex-col border-r border-border bg-surface transition-all duration-300 flex-shrink-0", isCollapsed ? "w-14" : "w-64")}>
       {/* Header */}
-      <div className="flex items-center border-b border-border/50 px-4 py-3">
+      <div className="flex items-center gap-2 border-b border-border/50 px-4 py-3">
         {!isCollapsed ? <>
           <Button variant="ghost" size="icon" onClick={() => setIsSearchModalOpen(true)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover">
             <Search className="h-5 w-5" />
           </Button>
+          
+          <ModeSwitcher currentMode={mode} onModeChange={onModeChange} />
           
           <Button variant="ghost" size="icon" onClick={() => onCollapsedChange(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover ml-auto">
             <PanelLeft className="h-5 w-5" />
