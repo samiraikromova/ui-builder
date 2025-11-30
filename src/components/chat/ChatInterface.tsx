@@ -79,6 +79,7 @@ const mockMessages: Record<string, Message[]> = {
     timestamp: "2:33 PM"
   }]
 };
+
 export function ChatInterface({
   chatId,
   onNewChat,
@@ -95,14 +96,16 @@ export function ChatInterface({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [chatFiles, setChatFiles] = useState<Record<string, File[]>>({});
+  const [chatMessages, setChatMessages] = useState<Record<string, Message[]>>(mockMessages);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
   // Get current chat's files
   const currentFiles = chatId ? (chatFiles[chatId] || []) : externalFiles;
   useEffect(() => {
-    if (chatId && mockMessages[chatId]) {
-      setMessages(mockMessages[chatId]);
+    if (chatId) {
+      // Load messages for existing chat
+      setMessages(chatMessages[chatId] || []);
     } else {
       setMessages([]);
     }
@@ -110,7 +113,7 @@ export function ChatInterface({
     if (chatId && externalFiles.length > 0) {
       setExternalFiles([]);
     }
-  }, [chatId]);
+  }, [chatId, chatMessages]);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth"
@@ -204,17 +207,18 @@ export function ChatInterface({
   };
   const handleSendMessage = async (content: string, files?: File[]) => {
     const isFirstMessage = messages.length === 0;
+    let activeChatId = chatId;
     
     // If this is a new chat (no chatId), create it
     if (!chatId && isFirstMessage) {
-      const newChatId = Date.now().toString();
+      activeChatId = Date.now().toString();
       onCreateChat(content);
       
       // Transfer external files to the new chat
       if (externalFiles.length > 0) {
         setChatFiles(prev => ({
           ...prev,
-          [newChatId]: externalFiles
+          [activeChatId!]: externalFiles
         }));
         setExternalFiles([]);
       }
@@ -235,7 +239,17 @@ export function ChatInterface({
       setIsTransitioning(true);
       // Wait for animation to complete before showing messages
       setTimeout(() => {
-        setMessages([newMessage]);
+        const updatedMessages = [newMessage];
+        setMessages(updatedMessages);
+        
+        // Store messages in chat history
+        if (activeChatId) {
+          setChatMessages(prev => ({
+            ...prev,
+            [activeChatId!]: updatedMessages
+          }));
+        }
+        
         setIsStreaming(true);
         setIsTransitioning(false);
         
@@ -250,13 +264,33 @@ export function ChatInterface({
               minute: "2-digit"
             })
           };
-          setMessages(prev => [...prev, aiResponse]);
+          const finalMessages = [...updatedMessages, aiResponse];
+          setMessages(finalMessages);
+          
+          // Update chat history with AI response
+          if (activeChatId) {
+            setChatMessages(prev => ({
+              ...prev,
+              [activeChatId!]: finalMessages
+            }));
+          }
+          
           setIsStreaming(false);
         }, 1000);
       }, 600);
     } else {
       // Not first message, add immediately
-      setMessages(prev => [...prev, newMessage]);
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
+      
+      // Store messages in chat history
+      if (activeChatId) {
+        setChatMessages(prev => ({
+          ...prev,
+          [activeChatId!]: updatedMessages
+        }));
+      }
+      
       setIsStreaming(true);
 
       // Simulate AI response
@@ -270,7 +304,17 @@ export function ChatInterface({
             minute: "2-digit"
           })
         };
-        setMessages(prev => [...prev, aiResponse]);
+        const finalMessages = [...updatedMessages, aiResponse];
+        setMessages(finalMessages);
+        
+        // Update chat history with AI response
+        if (activeChatId) {
+          setChatMessages(prev => ({
+            ...prev,
+            [activeChatId!]: finalMessages
+          }));
+        }
+        
         setIsStreaming(false);
       }, 1000);
     }
