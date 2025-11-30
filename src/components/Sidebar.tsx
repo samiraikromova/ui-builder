@@ -1,4 +1,4 @@
-import { Plus, Settings, User, PanelLeft, LogOut, CreditCard, Sparkles, UserIcon } from "lucide-react";
+import { Plus, Settings, User, PanelLeft, LogOut, CreditCard, Sparkles, UserIcon, Pencil, Trash2, FolderInput } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 interface Chat {
   id: string;
   title: string;
@@ -50,6 +60,21 @@ export function Sidebar({
   onNewChat
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleRenameChat = (chatId: string) => {
+    console.log("Rename chat:", chatId);
+    // TODO: Implement rename functionality
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    console.log("Delete chat:", chatId);
+    // TODO: Implement delete functionality
+  };
+
+  const handleMoveToFolder = (chatId: string, folder: string) => {
+    console.log("Move chat to folder:", chatId, folder);
+    // TODO: Implement folder move functionality
+  };
   return <div className={cn("flex h-full flex-col border-r border-border bg-surface transition-all duration-300 overflow-y-auto flex-shrink-0", isCollapsed ? "w-14" : "w-64")}>
       {/* Header with hamburger */}
       <div className="flex items-center justify-between border-b border-border p-3">
@@ -80,9 +105,55 @@ export function Sidebar({
           </div>
           <ScrollArea className="flex-1 px-2">
             <div className="space-y-0 pb-3">
-              {mockChats.map(chat => <button key={chat.id} onClick={() => onChatSelect(chat.id)} className={cn("flex w-full items-center rounded-lg px-2 py-1.5 text-left text-xs transition-colors", currentChatId === chat.id ? "bg-surface-hover text-foreground" : "text-muted-foreground hover:bg-surface-hover hover:text-foreground")}>
-                  <p className="truncate">{chat.title}</p>
-                </button>)}
+              {mockChats.map(chat => (
+                <ContextMenu key={chat.id}>
+                  <ContextMenuTrigger asChild>
+                    <button 
+                      onClick={() => onChatSelect(chat.id)} 
+                      className={cn(
+                        "flex w-full items-center rounded-lg px-2 py-1.5 text-left text-xs transition-colors", 
+                        currentChatId === chat.id 
+                          ? "bg-surface-hover text-foreground" 
+                          : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                      )}
+                    >
+                      <p className="truncate">{chat.title}</p>
+                    </button>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent className="w-48">
+                    <ContextMenuItem onClick={() => handleRenameChat(chat.id)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Rename
+                    </ContextMenuItem>
+                    <ContextMenuSeparator />
+                    <ContextMenuSub>
+                      <ContextMenuSubTrigger>
+                        <FolderInput className="mr-2 h-4 w-4" />
+                        Move to folder
+                      </ContextMenuSubTrigger>
+                      <ContextMenuSubContent>
+                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Work")}>
+                          Work
+                        </ContextMenuItem>
+                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Personal")}>
+                          Personal
+                        </ContextMenuItem>
+                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Projects")}>
+                          Projects
+                        </ContextMenuItem>
+                      </ContextMenuSubContent>
+                    </ContextMenuSub>
+                    <ContextMenuSeparator />
+                    <ContextMenuItem 
+                      onClick={() => handleDeleteChat(chat.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
+              ))}
             </div>
           </ScrollArea>
         </>}
