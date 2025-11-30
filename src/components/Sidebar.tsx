@@ -155,15 +155,9 @@ export function Sidebar({
         {!isCollapsed ? <>
             <div className="relative flex-1">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search chats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-2 py-1 text-xs rounded-lg bg-surface-hover border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-              />
+              <input type="text" placeholder="Search chats..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-8 pr-2 py-1 text-xs rounded-lg bg-surface-hover border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent" />
             </div>
-            <h2 className="text-sm font-semibold whitespace-nowrap absolute left-1/2 -translate-x-1/2">Leveraged Creator</h2>
+            
             <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:text-foreground ml-auto">
               <PanelLeft className="h-5 w-5" />
             </Button>
