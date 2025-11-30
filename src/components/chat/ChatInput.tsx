@@ -59,7 +59,7 @@ interface ChatInputProps {
   onToggleExtendedThinking: () => void;
   isEmptyState?: boolean;
   externalFiles?: File[];
-  onExternalFilesProcessed?: () => void;
+  onExternalFilesProcessed?: (files: File[]) => void;
 }
 export function ChatInput({
   onSendMessage,
@@ -101,14 +101,11 @@ export function ChatInput({
   }, []);
   // Handle external files from global drag and drop
   useEffect(() => {
-    if (externalFiles.length > 0) {
-      setFiles(prev => {
-        const newFiles = [...prev, ...externalFiles];
-        return newFiles.slice(0, MAX_FILES);
-      });
-      onExternalFilesProcessed?.();
+    if (externalFiles.length > 0 && onExternalFilesProcessed) {
+      setFiles(externalFiles);
+      // Don't clear external files here - just sync them
     }
-  }, [externalFiles, onExternalFilesProcessed]);
+  }, [externalFiles]);
 
   const handleSend = async () => {
     const hasContent = message.trim() || files.length > 0;
@@ -117,7 +114,7 @@ export function ChatInput({
       try {
         await onSendMessage(message, files.length > 0 ? files : undefined);
         setMessage("");
-        setFiles([]);
+        // Don't clear files - they persist as context
         setIsFullScreen(false);
         if (textareaRef.current) {
           textareaRef.current.style.height = "auto";
@@ -162,8 +159,9 @@ export function ChatInput({
     setIsDragging(false);
     const droppedFiles = Array.from(e.dataTransfer.files);
     if (droppedFiles.length > 0) {
-      const newFiles = [...files, ...droppedFiles];
-      setFiles(newFiles.slice(0, MAX_FILES));
+      const newFiles = [...files, ...droppedFiles].slice(0, MAX_FILES);
+      setFiles(newFiles);
+      onExternalFilesProcessed?.(newFiles);
     }
   };
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -174,12 +172,15 @@ export function ChatInput({
   };
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = [...files, ...Array.from(e.target.files)];
-      setFiles(newFiles.slice(0, MAX_FILES));
+      const newFiles = [...files, ...Array.from(e.target.files)].slice(0, MAX_FILES);
+      setFiles(newFiles);
+      onExternalFilesProcessed?.(newFiles);
     }
   };
   const handleRemoveFile = (index: number) => {
-    setFiles(files.filter((_, i) => i !== index));
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+    onExternalFilesProcessed?.(newFiles);
   };
 
   const getFileExtension = (filename: string) => {

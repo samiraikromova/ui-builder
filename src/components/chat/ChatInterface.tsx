@@ -94,13 +94,21 @@ export function ChatInterface({
   const [externalFiles, setExternalFiles] = useState<File[]>([]);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [chatFiles, setChatFiles] = useState<Record<string, File[]>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Get current chat's files
+  const currentFiles = chatId ? (chatFiles[chatId] || []) : externalFiles;
   useEffect(() => {
     if (chatId && mockMessages[chatId]) {
       setMessages(mockMessages[chatId]);
     } else {
       setMessages([]);
+    }
+    // Clear external files when switching to an existing chat
+    if (chatId && externalFiles.length > 0) {
+      setExternalFiles([]);
     }
   }, [chatId]);
   useEffect(() => {
@@ -166,7 +174,16 @@ export function ChatInterface({
       
       const droppedFiles = Array.from(e.dataTransfer?.files || []);
       if (droppedFiles.length > 0) {
-        setExternalFiles(droppedFiles);
+        if (chatId) {
+          // Add to current chat's files
+          setChatFiles(prev => ({
+            ...prev,
+            [chatId]: [...(prev[chatId] || []), ...droppedFiles]
+          }));
+        } else {
+          // Add to external files for new chat
+          setExternalFiles(prev => [...prev, ...droppedFiles]);
+        }
       }
     };
 
@@ -190,7 +207,17 @@ export function ChatInterface({
     
     // If this is a new chat (no chatId), create it
     if (!chatId && isFirstMessage) {
+      const newChatId = Date.now().toString();
       onCreateChat(content);
+      
+      // Transfer external files to the new chat
+      if (externalFiles.length > 0) {
+        setChatFiles(prev => ({
+          ...prev,
+          [newChatId]: externalFiles
+        }));
+        setExternalFiles([]);
+      }
     }
 
     const newMessage: Message = {
@@ -247,6 +274,19 @@ export function ChatInterface({
         setIsStreaming(false);
       }, 1000);
     }
+    
+    // DO NOT clear files after sending - they persist as context
+  };
+  
+  const handleFilesChange = (files: File[]) => {
+    if (chatId) {
+      setChatFiles(prev => ({
+        ...prev,
+        [chatId]: files
+      }));
+    } else {
+      setExternalFiles(files);
+    }
   };
   const isEmpty = messages.length === 0 && !isTransitioning;
   const showTransition = isTransitioning;
@@ -269,7 +309,19 @@ export function ChatInterface({
           </h1>
           
           <div className="w-full max-w-2xl transition-all duration-500 ease-out">
-            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} isEmptyState={true} externalFiles={externalFiles} onExternalFilesProcessed={() => setExternalFiles([])} />
+            <ChatInput 
+              onSendMessage={handleSendMessage} 
+              disabled={isStreaming} 
+              selectedProject={selectedProject} 
+              onSelectProject={handleSelectProject} 
+              selectedModel={selectedModel} 
+              onSelectModel={setSelectedModel} 
+              extendedThinking={extendedThinking} 
+              onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} 
+              isEmptyState={true} 
+              externalFiles={currentFiles} 
+              onExternalFilesProcessed={handleFilesChange}
+            />
           </div>
 
           <div style={{
@@ -294,8 +346,8 @@ export function ChatInterface({
                 extendedThinking={extendedThinking} 
                 onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} 
                 isEmptyState={true} 
-                externalFiles={externalFiles} 
-                onExternalFilesProcessed={() => setExternalFiles([])} 
+                externalFiles={currentFiles} 
+                onExternalFilesProcessed={handleFilesChange}
               />
             </div>
           </div>
@@ -326,7 +378,18 @@ export function ChatInterface({
           </button>
 
           <div className="shrink-0 transition-all duration-500 ease-out">
-            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} externalFiles={externalFiles} onExternalFilesProcessed={() => setExternalFiles([])} />
+            <ChatInput 
+              onSendMessage={handleSendMessage} 
+              disabled={isStreaming} 
+              selectedProject={selectedProject} 
+              onSelectProject={handleSelectProject} 
+              selectedModel={selectedModel} 
+              onSelectModel={setSelectedModel} 
+              extendedThinking={extendedThinking} 
+              onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} 
+              externalFiles={currentFiles} 
+              onExternalFilesProcessed={handleFilesChange}
+            />
           </div>
         </div>}
     </div>;
