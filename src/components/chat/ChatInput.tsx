@@ -262,7 +262,7 @@ export function ChatInput({
                     "h-8 w-8 shrink-0 rounded-lg transition-all flex items-center justify-center", 
                     hasContent 
                       ? "bg-accent text-accent-foreground hover:bg-accent-hover shadow-lg shadow-accent/20" 
-                      : "bg-primary/20 text-primary/40 hover:bg-primary/25"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90"
                   )} 
                   onClick={handleSend} 
                   disabled={!message.trim() || disabled}
