@@ -1,35 +1,37 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 interface Model {
   id: string;
   name: string;
   description: string;
 }
-
-const models: Model[] = [
-  { id: "claude-opus-4", name: "Opus 4.5", description: "Most capable" },
-  { id: "claude-sonnet-4-5", name: "Sonnet 4.5", description: "Best balance" },
-  { id: "claude-haiku-4", name: "Haiku 4", description: "Fastest" },
-];
-
+const models: Model[] = [{
+  id: "claude-opus-4",
+  name: "Opus 4.5",
+  description: "Most capable"
+}, {
+  id: "claude-sonnet-4-5",
+  name: "Sonnet 4.5",
+  description: "Best balance"
+}, {
+  id: "claude-haiku-4",
+  name: "Haiku 4",
+  description: "Fastest"
+}];
 interface ModelThinkingSelectorProps {
   selectedModel: string;
   onSelectModel: (modelId: string) => void;
   extendedThinking: boolean;
   onToggleExtendedThinking: () => void;
 }
-
 export function ModelThinkingSelector({
   selectedModel,
-  onSelectModel,
+  onSelectModel
 }: ModelThinkingSelectorProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  const currentModel = models.find((m) => m.id === selectedModel) || models[1];
-
+  const currentModel = models.find(m => m.id === selectedModel) || models[1];
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -39,40 +41,23 @@ export function ModelThinkingSelector({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="h-8 px-3 rounded-md flex items-center gap-2 text-sm text-muted-foreground transition-all hover:bg-surface-hover hover:text-foreground"
-      >
+  return <div ref={ref} className="relative">
+      <button onClick={() => setOpen(!open)} className="h-8 px-3 rounded-md flex items-center gap-2 text-sm text-muted-foreground transition-all hover:bg-surface-hover hover:text-foreground">
         <span>{currentModel.name}</span>
         <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
       </button>
 
-      {open && (
-        <div className="absolute bottom-full right-0 mb-2 w-56 rounded-xl border border-border bg-popover shadow-xl z-50">
+      {open && <div className="absolute bottom-full right-0 mb-2 w-56 rounded-xl border border-border bg-popover shadow-xl z-50">
           <div className="p-1.5">
-            <div className="mb-0.5 px-2 py-1 text-xs font-medium text-muted-foreground">Models</div>
-            {models.map((model) => (
-              <button
-                key={model.id}
-                onClick={() => {
-                  onSelectModel(model.id);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex w-full flex-col rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover",
-                  selectedModel === model.id && "bg-surface-hover"
-                )}
-              >
+            
+            {models.map(model => <button key={model.id} onClick={() => {
+          onSelectModel(model.id);
+          setOpen(false);
+        }} className={cn("flex w-full flex-col rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover", selectedModel === model.id && "bg-surface-hover")}>
                 <span className="text-sm font-medium text-foreground">{model.name}</span>
                 <span className="text-xs text-muted-foreground">{model.description}</span>
-              </button>
-            ))}
+              </button>)}
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 }
