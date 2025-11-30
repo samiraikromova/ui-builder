@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { Project } from "./ChatHeader";
+import { FileText, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 const mockProjects: Project[] = [{
   id: "cb4",
   name: "CB4 (Cam's Brain)",
@@ -85,6 +87,9 @@ export function ChatInterface({
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedModel, setSelectedModel] = useState("claude-opus-4");
   const [extendedThinking, setExtendedThinking] = useState(false);
+  const [isDraggingGlobal, setIsDraggingGlobal] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
+  const [externalFiles, setExternalFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (chatId && mockMessages[chatId]) {
@@ -98,6 +103,59 @@ export function ChatInterface({
       behavior: "smooth"
     });
   }, [messages]);
+
+  // Global drag and drop handlers
+  useEffect(() => {
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragCounter(prev => prev + 1);
+      if (e.dataTransfer?.types.includes("Files")) {
+        setIsDraggingGlobal(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragCounter(prev => {
+        const newCounter = prev - 1;
+        if (newCounter === 0) {
+          setIsDraggingGlobal(false);
+        }
+        return newCounter;
+      });
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDraggingGlobal(false);
+      setDragCounter(0);
+      
+      const droppedFiles = Array.from(e.dataTransfer?.files || []);
+      if (droppedFiles.length > 0) {
+        setExternalFiles(droppedFiles);
+      }
+    };
+
+    document.addEventListener("dragenter", handleDragEnter);
+    document.addEventListener("dragleave", handleDragLeave);
+    document.addEventListener("dragover", handleDragOver);
+    document.addEventListener("drop", handleDrop);
+
+    return () => {
+      document.removeEventListener("dragenter", handleDragEnter);
+      document.removeEventListener("dragleave", handleDragLeave);
+      document.removeEventListener("dragover", handleDragOver);
+      document.removeEventListener("drop", handleDrop);
+    };
+  }, []);
   const handleSelectProject = (project: Project | null) => {
     setSelectedProject(project);
   };
@@ -130,14 +188,25 @@ export function ChatInterface({
     }, 1000);
   };
   const isEmpty = messages.length === 0;
-  return <div className="flex h-full flex-1 flex-col min-h-0 overflow-hidden">
+  return <div className="flex h-full flex-1 flex-col min-h-0 overflow-hidden relative">
+      {/* Global drag and drop overlay */}
+      {isDraggingGlobal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <div className="rounded-2xl border-2 border-dashed border-accent/50 bg-accent/5 p-8">
+              <FileText className="h-16 w-16 text-accent" />
+            </div>
+            <p className="text-lg text-muted-foreground">Drop files here to add to chat</p>
+          </div>
+        </div>
+      )}
       {isEmpty ? <div className="flex flex-1 flex-col items-center justify-center px-4 transition-all duration-700 ease-out animate-fade-in">
           <h1 className="mb-16 bg-gradient-to-r from-[hsl(290,30%,55%)] to-[hsl(310,47%,25%)] bg-clip-text text-5xl font-medium text-transparent animate-scale-in">
             Hello, Cam
           </h1>
           
           <div className="w-full max-w-2xl transition-all duration-500 ease-out">
-            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} isEmptyState={true} />
+            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} isEmptyState={true} externalFiles={externalFiles} onExternalFilesProcessed={() => setExternalFiles([])} />
           </div>
 
           <div style={{
@@ -151,7 +220,7 @@ export function ChatInterface({
           <MessageList messages={messages} isStreaming={isStreaming} />
           <div ref={messagesEndRef} />
           <div className="shrink-0 transition-all duration-500 ease-out">
-            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} />
+            <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} externalFiles={externalFiles} onExternalFilesProcessed={() => setExternalFiles([])} />
           </div>
         </div>}
     </div>;

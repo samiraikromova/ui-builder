@@ -155,18 +155,18 @@ export function Sidebar({
       {/* Header */}
       <div className="flex items-center border-b border-border/50 p-4">
         {!isCollapsed ? <>
-            <Button variant="ghost" size="icon" onClick={() => setIsSearchModalOpen(true)} className="h-8 w-8 text-muted-foreground hover:text-foreground">
-              <Search className="h-5 w-5" />
+          <Button variant="ghost" size="icon" onClick={() => setIsSearchModalOpen(true)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover">
+            <Search className="h-5 w-5" />
+          </Button>
+          
+          <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-foreground">
+            Leveraged Creator
+          </div>
+          
+          <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover ml-auto">
+            <PanelLeft className="h-5 w-5" />
             </Button>
-            
-            <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-foreground">
-              Leveraged Creator
-            </div>
-            
-            <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:text-foreground ml-auto">
-              <PanelLeft className="h-5 w-5" />
-            </Button>
-          </> : <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:text-foreground mx-auto">
+        </> : <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover mx-auto">
             <PanelLeft className="h-5 w-5" />
           </Button>}
       </div>
@@ -181,9 +181,10 @@ export function Sidebar({
           </Button>}
       </div>
 
-      {/* Chat List */}
-      <ScrollArea className="flex-1">
-        <div className="space-y-1 p-2">
+      {/* Chat List - Only show when expanded */}
+      {!isCollapsed && (
+        <ScrollArea className="flex-1">
+          <div className="space-y-1 p-2">
           {/* Folders */}
           {folders.map(folder => {
           const folderChats = filterChats(getChatsInFolder(folder.id));
@@ -194,16 +195,16 @@ export function Sidebar({
                 if (e.key === "Enter") saveFolderRename(folder.id);
                 if (e.key === "Escape") cancelFolderRename();
               }} onBlur={() => saveFolderRename(folder.id)} className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent" autoFocus /> : <>
-                      <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
-                        <ChevronDown className={cn("h-3 w-3 transition-transform", !folder.isOpen && "-rotate-90")} />
-                        <span>{folder.name}</span>
-                      </CollapsibleTrigger>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreVertical className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                    <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs text-muted-foreground">
+                      <ChevronDown className={cn("h-3 w-3 transition-transform", !folder.isOpen && "-rotate-90")} />
+                      <span>{folder.name}</span>
+                    </CollapsibleTrigger>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleRenameFolder(folder.id)}>
                             <Pencil className="mr-2 h-3 w-3" />
@@ -229,12 +230,12 @@ export function Sidebar({
                               {chat.starred && <Star className="mr-1 h-3 w-3 fill-accent text-accent" />}
                               {chat.title}
                             </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <MoreVertical className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <MoreVertical className="h-3 w-3 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
                                   <Star className="mr-2 h-3 w-3" />
@@ -282,12 +283,12 @@ export function Sidebar({
                       <Star className="mr-1 h-3 w-3 fill-accent text-accent" />
                       {chat.title}
                     </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreVertical className="h-3 w-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="h-3 w-3 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
                             <Star className="mr-2 h-3 w-3" />
@@ -334,12 +335,12 @@ export function Sidebar({
                     <Button variant="ghost" size="sm" onClick={() => onChatSelect(chat.id)} className={cn("flex-1 justify-start truncate text-xs", currentChatId === chat.id ? "bg-accent/10 text-accent hover:bg-accent/20" : "text-muted-foreground hover:text-foreground")}>
                       {chat.title}
                     </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <MoreVertical className="h-3 w-3 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
                           <Star className="mr-2 h-3 w-3" />
@@ -366,8 +367,9 @@ export function Sidebar({
                   </>}
               </div>)}
           </div>
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
+      )}
 
       {/* User Profile */}
       <div className="mt-auto border-t border-border">

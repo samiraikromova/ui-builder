@@ -58,6 +58,8 @@ interface ChatInputProps {
   extendedThinking: boolean;
   onToggleExtendedThinking: () => void;
   isEmptyState?: boolean;
+  externalFiles?: File[];
+  onExternalFilesProcessed?: () => void;
 }
 export function ChatInput({
   onSendMessage,
@@ -68,7 +70,9 @@ export function ChatInput({
   onSelectModel,
   extendedThinking,
   onToggleExtendedThinking,
-  isEmptyState = false
+  isEmptyState = false,
+  externalFiles = [],
+  onExternalFilesProcessed
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -79,6 +83,14 @@ export function ChatInput({
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Handle external files from global drag and drop
+  useEffect(() => {
+    if (externalFiles.length > 0) {
+      setFiles(prev => [...prev, ...externalFiles]);
+      onExternalFilesProcessed?.();
+    }
+  }, [externalFiles, onExternalFilesProcessed]);
+
   const handleSend = () => {
     if (message.trim() && !disabled) {
       onSendMessage(message, files.length > 0 ? files : undefined);
