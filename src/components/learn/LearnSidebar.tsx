@@ -67,7 +67,7 @@ export const LearnSidebar = ({
       )}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-border p-3">
+      <div className="flex items-center justify-center gap-2 border-b border-border p-3 relative">
         {!isCollapsed && (
           <>
             <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
@@ -75,7 +75,7 @@ export const LearnSidebar = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent absolute left-3"
                 >
                   <Search className="h-4 w-4" />
                 </Button>
@@ -131,7 +131,10 @@ export const LearnSidebar = ({
           variant="ghost"
           size="icon"
           onClick={() => onCollapsedChange(!isCollapsed)}
-          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent ml-auto"
+          className={cn(
+            "h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent",
+            !isCollapsed ? "absolute right-3" : "mx-auto"
+          )}
         >
           {isCollapsed ? (
             <ChevronRight className="h-4 w-4" />

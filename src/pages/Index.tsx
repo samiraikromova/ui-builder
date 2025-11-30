@@ -90,7 +90,7 @@ const Index = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {mode === "chat" ? (
-        <>
+        <div className="flex w-full animate-fade-in">
           <Sidebar 
             currentChatId={chatId} 
             onChatSelect={setChatId} 
@@ -107,9 +107,9 @@ const Index = () => {
             onNewChat={handleNewChat}
             onCreateChat={handleCreateChat}
           />
-        </>
+        </div>
       ) : (
-        <>
+        <div className="flex w-full animate-fade-in">
           <LearnSidebar
             currentLessonId={lessonId}
             onLessonSelect={setLessonId}
@@ -126,7 +126,7 @@ const Index = () => {
             modules={modules}
             contentType={contentType}
           />
-        </>
+        </div>
       )}
     </div>
   );
