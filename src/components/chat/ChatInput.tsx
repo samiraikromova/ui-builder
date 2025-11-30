@@ -213,12 +213,12 @@ export function ChatInput({
                   {files.map((file, index) => (
                     <div
                       key={index}
-                      className="relative flex-shrink-0 w-[125px] rounded-lg border border-border bg-surface hover:bg-surface-hover transition-colors p-2 group"
+                      className="relative flex-shrink-0 w-[120px] rounded-lg border border-border bg-surface hover:bg-surface-hover transition-colors p-2 group"
                     >
-                      {/* Remove button */}
+                      {/* Remove button - only visible on hover */}
                       <button
                         onClick={() => handleRemoveFile(index)}
-                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface transition-colors z-10 shadow-sm"
+                        className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface transition-all z-10 shadow-sm opacity-0 group-hover:opacity-100"
                       >
                         <X className="h-3 w-3" />
                       </button>
