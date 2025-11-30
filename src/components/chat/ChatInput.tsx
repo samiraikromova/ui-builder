@@ -260,7 +260,9 @@ export function ChatInput({
                   size="icon" 
                   className={cn(
                     "h-8 w-8 shrink-0 rounded-lg transition-all flex items-center justify-center", 
-                    hasContent ? "bg-accent text-accent-foreground hover:bg-accent-hover shadow-lg" : "bg-surface-hover text-muted-foreground"
+                    hasContent 
+                      ? "bg-accent text-accent-foreground hover:bg-accent-hover shadow-lg shadow-accent/20" 
+                      : "bg-primary/20 text-primary/40 hover:bg-primary/25"
                   )} 
                   onClick={handleSend} 
                   disabled={!message.trim() || disabled}
