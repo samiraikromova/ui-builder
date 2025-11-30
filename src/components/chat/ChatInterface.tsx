@@ -91,6 +91,10 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleSelectProject = (project: Project | null) => {
+    setSelectedProject(project);
+  };
+
   const handleSendMessage = async (content: string, files?: File[]) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -136,7 +140,7 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
               onSendMessage={handleSendMessage} 
               disabled={isStreaming}
               selectedProject={selectedProject}
-              onSelectProject={setSelectedProject}
+              onSelectProject={handleSelectProject}
               selectedModel={selectedModel}
               onSelectModel={setSelectedModel}
               extendedThinking={extendedThinking}
@@ -170,7 +174,7 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
             onSendMessage={handleSendMessage} 
             disabled={isStreaming}
             selectedProject={selectedProject}
-            onSelectProject={setSelectedProject}
+            onSelectProject={handleSelectProject}
             selectedModel={selectedModel}
             onSelectModel={setSelectedModel}
             extendedThinking={extendedThinking}

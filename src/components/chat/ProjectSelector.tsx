@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Wrench, X } from "lucide-react";
 import { Project } from "./ChatHeader";
 import { cn } from "@/lib/utils";
 
 interface ProjectSelectorProps {
   projects: Project[];
-  selected: Project;
-  onChange: (project: Project) => void;
+  selected: Project | null;
+  onChange: (project: Project | null) => void;
 }
 
 export function ProjectSelector({ projects, selected, onChange }: ProjectSelectorProps) {
@@ -24,27 +24,36 @@ export function ProjectSelector({ projects, selected, onChange }: ProjectSelecto
   }, []);
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative flex items-center gap-2">
+      {/* Tools button */}
       <button
         onClick={() => setOpen(!open)}
-        className={cn(
-          "flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-colors hover:bg-surface-hover",
-          selected && "bg-accent/10"
-        )}
+        className="flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-colors hover:bg-surface-hover"
       >
-        {selected ? (
-          <>
-            <span className="text-base">{selected.icon}</span>
-            <span className="text-foreground">{selected.name}</span>
-          </>
-        ) : (
-          <span className="text-muted-foreground">Tools</span>
-        )}
+        <Wrench className="h-4 w-4 text-muted-foreground" />
         <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 
+      {/* Selected project pill */}
+      {selected && (
+        <div className="flex items-center gap-2 rounded-full border border-border/50 bg-surface px-3 py-2">
+          <span className="text-base">{selected.icon}</span>
+          <span className="text-sm text-foreground">{selected.name}</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(null);
+            }}
+            className="ml-1 rounded-full p-0.5 transition-colors hover:bg-surface-hover"
+          >
+            <X className="h-3 w-3 text-muted-foreground" />
+          </button>
+        </div>
+      )}
+
+      {/* Dropdown menu */}
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 w-80 rounded-2xl border border-border bg-popover shadow-xl">
+        <div className="absolute bottom-full left-0 mb-2 w-80 rounded-2xl border border-border bg-popover shadow-xl z-50">
           <div className="max-h-96 overflow-y-auto p-2">
             {projects.map((project) => (
               <button
