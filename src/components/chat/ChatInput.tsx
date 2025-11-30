@@ -1,5 +1,5 @@
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Plus, Mic } from "lucide-react";
+import { Send, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -151,6 +151,18 @@ export function ChatInput({
                 selected={selectedProject}
                 onChange={onSelectProject}
               />
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover",
+                  extendedThinking && "text-accent"
+                )}
+                onClick={onToggleExtendedThinking}
+                disabled={disabled}
+              >
+                <Sparkles className="h-5 w-5" />
+              </Button>
             </div>
 
             {/* Right controls */}

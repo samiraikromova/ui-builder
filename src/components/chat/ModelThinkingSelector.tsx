@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 
 interface Model {
   id: string;
@@ -25,14 +24,11 @@ interface ModelThinkingSelectorProps {
 export function ModelThinkingSelector({
   selectedModel,
   onSelectModel,
-  extendedThinking,
-  onToggleExtendedThinking,
 }: ModelThinkingSelectorProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const currentModel = models.find((m) => m.id === selectedModel) || models[1];
-  const displayText = extendedThinking ? "Thinking" : currentModel.name;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -50,7 +46,7 @@ export function ModelThinkingSelector({
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition-all hover:bg-surface-hover hover:text-foreground"
       >
-        <span>{displayText}</span>
+        <span>{currentModel.name}</span>
         <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
       </button>
 
@@ -74,30 +70,6 @@ export function ModelThinkingSelector({
                 <span className="text-xs text-muted-foreground">{model.description}</span>
               </button>
             ))}
-          </div>
-
-          <Separator className="my-1" />
-
-          <div className="p-2">
-            <button
-              onClick={() => {
-                onToggleExtendedThinking();
-                setOpen(false);
-              }}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm transition-colors hover:bg-surface-hover",
-                extendedThinking && "bg-surface-hover"
-              )}
-            >
-              <Sparkles className={cn("h-4 w-4", extendedThinking && "text-accent")} />
-              <div className="flex-1 text-left">
-                <div className="text-sm font-medium text-foreground">Extended thinking</div>
-                <div className="text-xs text-muted-foreground">Deep reasoning for complex tasks</div>
-              </div>
-              {extendedThinking && (
-                <div className="h-2 w-2 rounded-full bg-accent" />
-              )}
-            </button>
           </div>
         </div>
       )}
