@@ -71,7 +71,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Segoe UI", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "Lyon", "ui-serif", "Georgia", "serif"],
+        mono: ["JetBrains Mono", "iA Writer Mono", "ui-monospace", "Menlo", "monospace"],
       },
       borderRadius: {
         lg: "1rem",

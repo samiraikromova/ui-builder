@@ -178,13 +178,13 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
               <button
                 key={project.id}
                 onClick={() => setSelectedProject(project)}
-                className={`flex items-center justify-center rounded-lg border px-3 py-2 text-left transition-all duration-200 ${
+                className={`flex items-center justify-center text-center rounded-lg border px-3 py-2 transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis ${
                   selectedProject?.id === project.id
                     ? "border-accent bg-accent/10 text-muted-foreground"
                     : "border-border/30 bg-surface/50 hover:bg-surface-hover text-muted-foreground"
                 }`}
               >
-                <span className="text-xs">{project.name}</span>
+                <span className="text-xs truncate">{project.name}</span>
               </button>
             ))}
           </div>

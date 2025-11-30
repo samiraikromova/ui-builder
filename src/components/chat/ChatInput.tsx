@@ -202,7 +202,7 @@ export function ChatInput({
               onKeyDown={handleKeyDown} 
               placeholder="Enter a prompt" 
               rows={1}
-              className="min-h-[24px] max-h-[168px] resize-none border-0 bg-transparent px-0 py-0 text-base focus-visible:ring-0 focus-visible:outline-none outline-none ring-0 placeholder:text-muted-foreground overflow-y-auto" 
+              className="min-h-[24px] max-h-[168px] resize-none border-0 bg-transparent px-0 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none outline-none ring-0 placeholder:text-xs placeholder:text-muted-foreground overflow-y-auto" 
               disabled={disabled} 
             />
             {lineCount >= 3 && (
