@@ -79,15 +79,15 @@ export function Sidebar({
   };
   return <div className={cn("flex h-full flex-col border-r border-border bg-surface transition-all duration-300 flex-shrink-0", isCollapsed ? "w-14" : "w-64")}>
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-border/50 px-4 py-3">
+      <div className="flex items-center justify-center gap-2 border-b border-border/50 px-4 py-3">
         {!isCollapsed ? <>
-          <Button variant="ghost" size="icon" onClick={() => setIsSearchModalOpen(true)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover">
+          <Button variant="ghost" size="icon" onClick={() => setIsSearchModalOpen(true)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover absolute left-4">
             <Search className="h-5 w-5" />
           </Button>
           
           <ModeSwitcher currentMode={mode} onModeChange={onModeChange} />
           
-          <Button variant="ghost" size="icon" onClick={() => onCollapsedChange(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover ml-auto">
+          <Button variant="ghost" size="icon" onClick={() => onCollapsedChange(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover absolute right-4">
             <PanelLeft className="h-5 w-5" />
             </Button>
         </> : <Button variant="ghost" size="icon" onClick={() => onCollapsedChange(!isCollapsed)} className="h-8 w-8 text-muted-foreground hover:bg-surface-hover mx-auto">
