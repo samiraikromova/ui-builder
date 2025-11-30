@@ -130,7 +130,7 @@ export function ChatInterface({
     }, 1000);
   };
   const isEmpty = messages.length === 0;
-  return <div className="flex h-full flex-1 flex-col">
+  return <div className="flex h-full flex-1 flex-col min-h-0 overflow-hidden">
       {isEmpty ? <div className="flex flex-1 flex-col items-center justify-center px-4 transition-all duration-700 ease-out animate-fade-in">
           <h1 className="mb-16 bg-gradient-to-r from-[hsl(290,30%,55%)] to-[hsl(310,47%,25%)] bg-clip-text text-5xl font-medium text-transparent animate-scale-in">
             Hello, Cam
@@ -147,10 +147,10 @@ export function ChatInterface({
                 <span className="text-xs">{project.name}</span>
               </button>)}
           </div>
-        </div> : <div className="flex flex-1 flex-col animate-fade-in">
+        </div> : <div className="flex flex-1 flex-col min-h-0 overflow-hidden animate-fade-in">
           <MessageList messages={messages} isStreaming={isStreaming} />
           <div ref={messagesEndRef} />
-          <div className="transition-all duration-500 ease-out">
+          <div className="shrink-0 transition-all duration-500 ease-out">
             <ChatInput onSendMessage={handleSendMessage} disabled={isStreaming} selectedProject={selectedProject} onSelectProject={handleSelectProject} selectedModel={selectedModel} onSelectModel={setSelectedModel} extendedThinking={extendedThinking} onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} />
           </div>
         </div>}

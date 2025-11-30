@@ -1,290 +1,604 @@
 import { useState } from "react";
-import { PanelLeft, Plus, User, ChevronDown, ChevronRight, Settings, Pencil, Trash2, FolderInput, Folder as FolderIcon, FolderPlus, UserIcon, Sparkles, CreditCard, LogOut, MoreVertical, Star } from "lucide-react";
+import {
+  PanelLeft,
+  Plus,
+  FolderPlus,
+  Settings,
+  CreditCard,
+  User,
+  LogOut,
+  MoreVertical,
+  Star,
+  Search,
+  ChevronDown,
+  UserIcon,
+  Sparkles,
+  Trash2,
+  Pencil,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+
 interface Chat {
   id: string;
   title: string;
-  folderId?: string;
-  starred?: boolean;
+  folderId?: string | null;
+  starred: boolean;
 }
+
 interface Folder {
   id: string;
   name: string;
   isOpen: boolean;
 }
+
 interface SidebarProps {
   currentChatId: string | null;
   onChatSelect: (chatId: string) => void;
   onNewChat: () => void;
 }
-export function Sidebar({
-  currentChatId,
-  onChatSelect,
-  onNewChat
-}: SidebarProps) {
+
+export function Sidebar({ currentChatId, onChatSelect, onNewChat }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Chat state
-  const [chats, setChats] = useState<Chat[]>([{
-    id: "1",
-    title: "Marketing campaign ideas"
-  }, {
-    id: "2",
-    title: "Video script review"
-  }, {
-    id: "3",
-    title: "Client proposal draft"
-  }, {
-    id: "4",
-    title: "Social media strategy"
-  }, {
-    id: "5",
-    title: "Ad copy variations"
-  }]);
-
-  // Folder state
-  const [folders, setFolders] = useState<Folder[]>([{
-    id: "work",
-    name: "Work",
-    isOpen: true
-  }, {
-    id: "personal",
-    name: "Personal",
-    isOpen: true
-  }]);
-
-  // Editing states
+  const [chats, setChats] = useState<Chat[]>([
+    { id: "1", title: "Marketing campaign ideas", folderId: null, starred: false },
+    { id: "2", title: "Video script review", folderId: null, starred: false },
+    { id: "3", title: "Product description help", folderId: null, starred: false },
+  ]);
+  const [folders, setFolders] = useState<Folder[]>([
+    { id: "work", name: "Work", isOpen: true },
+    { id: "personal", name: "Personal", isOpen: false },
+  ]);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
-  const [editingFolderName, setEditingFolderName] = useState("");
-  const [hoveredChatId, setHoveredChatId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Chat operations
-  const handleRenameChat = (chatId: string, currentTitle: string) => {
-    setEditingChatId(chatId);
-    setEditingTitle(currentTitle);
+  const handleRenameChat = (chatId: string) => {
+    const chat = chats.find((c) => c.id === chatId);
+    if (chat) {
+      setEditingChatId(chatId);
+      setEditValue(chat.title);
+    }
   };
-  const saveChatRename = () => {
-    if (editingChatId && editingTitle.trim()) {
-      setChats(chats.map(chat => chat.id === editingChatId ? {
-        ...chat,
-        title: editingTitle.trim()
-      } : chat));
+
+  const saveChatRename = (chatId: string) => {
+    if (editValue.trim()) {
+      setChats(
+        chats.map((chat) =>
+          chat.id === chatId ? { ...chat, title: editValue.trim() } : chat
+        )
+      );
     }
     setEditingChatId(null);
-    setEditingTitle("");
-  };
-  const cancelChatRename = () => {
-    setEditingChatId(null);
-    setEditingTitle("");
-  };
-  const handleDeleteChat = (chatId: string) => {
-    setChats(chats.filter(chat => chat.id !== chatId));
-  };
-  const handleMoveToFolder = (chatId: string, folderId: string | null) => {
-    setChats(chats.map(chat => chat.id === chatId ? {
-      ...chat,
-      folderId: folderId || undefined
-    } : chat));
-  };
-  const handleStarChat = (chatId: string) => {
-    setChats(chats.map(chat => chat.id === chatId ? {
-      ...chat,
-      starred: !chat.starred
-    } : chat));
+    setEditValue("");
   };
 
-  // Folder operations
+  const cancelChatRename = () => {
+    setEditingChatId(null);
+    setEditValue("");
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    setChats(chats.filter((chat) => chat.id !== chatId));
+  };
+
+  const handleMoveToFolder = (chatId: string, folderId: string | null) => {
+    setChats(
+      chats.map((chat) =>
+        chat.id === chatId ? { ...chat, folderId } : chat
+      )
+    );
+  };
+
+  const handleStarChat = (chatId: string) => {
+    setChats(
+      chats.map((chat) =>
+        chat.id === chatId ? { ...chat, starred: !chat.starred } : chat
+      )
+    );
+  };
+
   const handleCreateFolder = () => {
     const newFolder: Folder = {
       id: `folder-${Date.now()}`,
       name: "New Folder",
-      isOpen: true
+      isOpen: true,
     };
     setFolders([...folders, newFolder]);
     setEditingFolderId(newFolder.id);
-    setEditingFolderName(newFolder.name);
-  };
-  const handleRenameFolder = (folderId: string, currentName: string) => {
-    setEditingFolderId(folderId);
-    setEditingFolderName(currentName);
-  };
-  const saveFolderRename = () => {
-    if (editingFolderId && editingFolderName.trim()) {
-      setFolders(folders.map(folder => folder.id === editingFolderId ? {
-        ...folder,
-        name: editingFolderName.trim()
-      } : folder));
-    }
-    setEditingFolderId(null);
-    setEditingFolderName("");
-  };
-  const cancelFolderRename = () => {
-    setEditingFolderId(null);
-    setEditingFolderName("");
-  };
-  const handleDeleteFolder = (folderId: string) => {
-    // Move chats back to uncategorized
-    setChats(chats.map(chat => chat.folderId === folderId ? {
-      ...chat,
-      folderId: undefined
-    } : chat));
-    setFolders(folders.filter(folder => folder.id !== folderId));
-  };
-  const toggleFolder = (folderId: string) => {
-    setFolders(folders.map(folder => folder.id === folderId ? {
-      ...folder,
-      isOpen: !folder.isOpen
-    } : folder));
+    setEditValue(newFolder.name);
   };
 
-  // Get chats by category
-  const getChatsInFolder = (folderId: string) => chats.filter(chat => chat.folderId === folderId);
-  const getUncategorizedChats = () => chats.filter(chat => !chat.folderId);
-  return <div className={cn("flex h-full flex-col border-r border-border bg-surface transition-all duration-300 overflow-y-auto flex-shrink-0", isCollapsed ? "w-14" : "w-64")}>
+  const handleRenameFolder = (folderId: string) => {
+    const folder = folders.find((f) => f.id === folderId);
+    if (folder) {
+      setEditingFolderId(folderId);
+      setEditValue(folder.name);
+    }
+  };
+
+  const saveFolderRename = (folderId: string) => {
+    if (editValue.trim()) {
+      setFolders(
+        folders.map((folder) =>
+          folder.id === folderId ? { ...folder, name: editValue.trim() } : folder
+        )
+      );
+    }
+    setEditingFolderId(null);
+    setEditValue("");
+  };
+
+  const cancelFolderRename = () => {
+    setEditingFolderId(null);
+    setEditValue("");
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    setChats(
+      chats.map((chat) =>
+        chat.folderId === folderId ? { ...chat, folderId: null } : chat
+      )
+    );
+    setFolders(folders.filter((folder) => folder.id !== folderId));
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setFolders(
+      folders.map((folder) =>
+        folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder
+      )
+    );
+  };
+
+  const getChatsInFolder = (folderId: string) => {
+    return chats.filter((chat) => chat.folderId === folderId);
+  };
+
+  const getUncategorizedChats = () => {
+    return chats.filter((chat) => !chat.folderId && !chat.starred);
+  };
+
+  const getStarredChats = () => {
+    return chats.filter((chat) => chat.starred);
+  };
+
+  const filterChats = (chatList: Chat[]) => {
+    if (!searchQuery) return chatList;
+    return chatList.filter((chat) =>
+      chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex h-full flex-col border-r border-border bg-surface transition-all duration-300 flex-shrink-0",
+        isCollapsed ? "w-14" : "w-64"
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border p-3">
-        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 rounded-lg hover:bg-surface-hover">
-          <PanelLeft className="h-4 w-4 text-muted-foreground" />
-        </Button>
-        {!isCollapsed && <span className="text-sm font-medium text-muted-foreground">Leveraged Creator</span>}
+      <div className="flex items-center gap-2 border-b border-border/50 p-4">
+        {!isCollapsed ? (
+          <>
+            <div className="flex-1 flex items-center gap-2 rounded-lg bg-surface-hover/50 px-3 py-1.5">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search chats"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+              />
+            </div>
+            <h2 className="text-sm font-semibold whitespace-nowrap">Leveraged Creator</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            >
+              <PanelLeft className="h-5 w-5" />
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground mx-auto"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       {/* New Chat Button */}
       <div className="p-3">
-        {!isCollapsed ? <Button onClick={onNewChat} className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-accent-hover">
+        {!isCollapsed ? (
+          <Button
+            onClick={onNewChat}
+            className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-accent-hover"
+          >
             <Plus className="h-4 w-4" />
             New Chat
-          </Button> : <Button onClick={onNewChat} size="icon" className="h-8 w-8 rounded-lg bg-primary text-primary-foreground hover:bg-accent-hover">
+          </Button>
+        ) : (
+          <Button
+            onClick={onNewChat}
+            size="icon"
+            className="h-8 w-8 rounded-lg bg-primary text-primary-foreground hover:bg-accent-hover mx-auto"
+          >
             <Plus className="h-4 w-4" />
-          </Button>}
+          </Button>
+        )}
       </div>
 
       {/* Chat List */}
-      {!isCollapsed && <div className="flex-1 overflow-y-auto px-2">
+      <ScrollArea className="flex-1">
+        <div className="space-y-1 p-2">
           {/* Folders */}
-          {folders.map(folder => <Collapsible key={folder.id} open={folder.isOpen} onOpenChange={() => toggleFolder(folder.id)}>
-              <div className="flex items-center gap-1 py-2">
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:bg-surface-hover">
-                    {folder.isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                  </Button>
-                </CollapsibleTrigger>
-                
-                <ContextMenu>
-                  <ContextMenuTrigger asChild>
-                    {editingFolderId === folder.id ? <Input value={editingFolderName} onChange={e => setEditingFolderName(e.target.value)} onBlur={saveFolderRename} onKeyDown={e => {
-                if (e.key === "Enter") saveFolderRename();
-                if (e.key === "Escape") cancelFolderRename();
-              }} autoFocus className="h-6 text-xs flex-1 bg-muted/50" /> : <div className="flex items-center gap-1 flex-1 text-xs text-muted-foreground cursor-pointer">
-                        <FolderIcon className="h-3 w-3" />
-                        <span>{folder.name}</span>
-                      </div>}
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem onClick={() => handleRenameFolder(folder.id, folder.name)}>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      Rename
-                    </ContextMenuItem>
-                    <ContextMenuSeparator />
-                    <ContextMenuItem onClick={() => handleDeleteFolder(folder.id)} className="text-destructive focus:text-destructive">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </ContextMenuItem>
-                  </ContextMenuContent>
-                </ContextMenu>
-              </div>
-              
-              <CollapsibleContent className="pl-6 space-y-1">
-                {getChatsInFolder(folder.id).map(chat => <div key={chat.id} className="group relative" onMouseEnter={() => setHoveredChatId(chat.id)} onMouseLeave={() => setHoveredChatId(null)}>
-                    {editingChatId === chat.id ? <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} onBlur={saveChatRename} onKeyDown={e => {
-              if (e.key === "Enter") saveChatRename();
-              if (e.key === "Escape") cancelChatRename();
-            }} autoFocus className="h-7 text-xs bg-muted/50" /> : <div className="flex items-center gap-1">
-                        <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 text-left px-2 py-1.5 rounded-lg text-xs transition-colors truncate", currentChatId === chat.id ? "bg-surface-hover text-foreground" : "text-muted-foreground hover:bg-surface-hover hover:text-foreground")}>
-                          {chat.title}
-                        </button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className={cn("h-6 w-6 shrink-0 rounded-lg transition-opacity", hoveredChatId === chat.id ? "opacity-100" : "opacity-0")}>
-                              <MoreVertical className="h-3 w-3 text-muted-foreground" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
-                              <Star className={cn("mr-2 h-4 w-4", chat.starred && "fill-accent text-accent")} />
-                              {chat.starred ? "Unstar" : "Star"}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleRenameChat(chat.id, chat.title)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Rename
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)} className="text-destructive focus:text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>}
-                  </div>)}
-              </CollapsibleContent>
-            </Collapsible>)}
+          {folders.map((folder) => {
+            const folderChats = filterChats(getChatsInFolder(folder.id));
+            if (folderChats.length === 0 && searchQuery) return null;
 
-          {/* Recent/Uncategorized chats */}
-          <div className="py-2">
-            <div className="flex items-center justify-between px-2 mb-2">
-              <p className="text-xs text-muted-foreground font-medium">Recent</p>
-              <Button variant="ghost" size="icon" onClick={handleCreateFolder} className="h-6 w-6 text-muted-foreground hover:bg-surface-hover" title="New Folder">
-                <FolderPlus className="py-0 px-0 mx-0 my-0 h-[16px] w-[16px]" />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              {getUncategorizedChats().map(chat => <div key={chat.id} className="group relative" onMouseEnter={() => setHoveredChatId(chat.id)} onMouseLeave={() => setHoveredChatId(null)}>
-                  {editingChatId === chat.id ? <Input value={editingTitle} onChange={e => setEditingTitle(e.target.value)} onBlur={saveChatRename} onKeyDown={e => {
-              if (e.key === "Enter") saveChatRename();
-              if (e.key === "Escape") cancelChatRename();
-            }} autoFocus className="h-7 text-xs bg-muted/50" /> : <div className="flex items-center gap-1">
-                      <button onClick={() => onChatSelect(chat.id)} className={cn("flex-1 text-left px-2 py-1.5 rounded-lg text-xs transition-colors truncate", currentChatId === chat.id ? "bg-surface-hover text-foreground" : "text-muted-foreground hover:bg-surface-hover hover:text-foreground")}>
-                        {chat.title}
-                      </button>
+            return (
+              <Collapsible
+                key={folder.id}
+                open={folder.isOpen}
+                onOpenChange={() => toggleFolder(folder.id)}
+              >
+                <div className="group flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors">
+                  {editingFolderId === folder.id ? (
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveFolderRename(folder.id);
+                        if (e.key === "Escape") cancelFolderRename();
+                      }}
+                      onBlur={() => saveFolderRename(folder.id)}
+                      className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs text-muted-foreground hover:text-foreground">
+                        <ChevronDown
+                          className={cn(
+                            "h-3 w-3 transition-transform",
+                            !folder.isOpen && "-rotate-90"
+                          )}
+                        />
+                        <span>{folder.name}</span>
+                      </CollapsibleTrigger>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className={cn("h-6 w-6 shrink-0 rounded-lg transition-opacity", hoveredChatId === chat.id ? "opacity-100" : "opacity-0")}>
-                            <MoreVertical className="h-3 w-3 text-muted-foreground" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="h-3 w-3" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
-                            <Star className={cn("mr-2 h-4 w-4", chat.starred && "fill-accent text-accent")} />
-                            {chat.starred ? "Unstar" : "Star"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRenameChat(chat.id, chat.title)}>
-                            <Pencil className="mr-2 h-4 w-4" />
+                          <DropdownMenuItem onClick={() => handleRenameFolder(folder.id)}>
+                            <Pencil className="mr-2 h-3 w-3" />
                             Rename
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)} className="text-destructive focus:text-destructive">
-                            <Trash2 className="mr-2 h-4 w-4" />
+                          <DropdownMenuItem onClick={() => handleDeleteFolder(folder.id)}>
+                            <Trash2 className="mr-2 h-3 w-3" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>}
-                </div>)}
+                    </>
+                  )}
+                </div>
+
+                <CollapsibleContent>
+                  <div className="ml-4 space-y-0.5">
+                    {folderChats.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors"
+                      >
+                        {editingChatId === chat.id ? (
+                          <input
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveChatRename(chat.id);
+                              if (e.key === "Escape") cancelChatRename();
+                            }}
+                            onBlur={() => saveChatRename(chat.id)}
+                            className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                            autoFocus
+                          />
+                        ) : (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onChatSelect(chat.id)}
+                              className={cn(
+                                "flex-1 justify-start truncate text-xs",
+                                currentChatId === chat.id
+                                  ? "bg-accent/10 text-accent hover:bg-accent/20"
+                                  : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              {chat.starred && (
+                                <Star className="mr-1 h-3 w-3 fill-accent text-accent" />
+                              )}
+                              {chat.title}
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <MoreVertical className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
+                                  <Star className="mr-2 h-3 w-3" />
+                                  {chat.starred ? "Unstar" : "Star"}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleRenameChat(chat.id)}>
+                                  <Pencil className="mr-2 h-3 w-3" />
+                                  Rename
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)}>
+                                  <Trash2 className="mr-2 h-3 w-3" />
+                                  Delete
+                                </DropdownMenuItem>
+                                <DropdownMenuSub>
+                                  <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
+                                  <DropdownMenuSubContent>
+                                    {chat.folderId && (
+                                      <DropdownMenuItem
+                                        onClick={() => handleMoveToFolder(chat.id, null)}
+                                      >
+                                        Remove from folder
+                                      </DropdownMenuItem>
+                                    )}
+                                    {folders
+                                      .filter((f) => f.id !== chat.folderId)
+                                      .map((f) => (
+                                        <DropdownMenuItem
+                                          key={f.id}
+                                          onClick={() => handleMoveToFolder(chat.id, f.id)}
+                                        >
+                                          {f.name}
+                                        </DropdownMenuItem>
+                                      ))}
+                                  </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
+
+          {/* Starred Chats */}
+          {getStarredChats().length > 0 && (
+            <div className="space-y-0.5">
+              {!isCollapsed && (
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <div className="text-xs font-medium text-muted-foreground">Starred</div>
+                </div>
+              )}
+              {filterChats(getStarredChats()).map((chat) => (
+                <div
+                  key={chat.id}
+                  className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors"
+                >
+                  {editingChatId === chat.id ? (
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveChatRename(chat.id);
+                        if (e.key === "Escape") cancelChatRename();
+                      }}
+                      onBlur={() => saveChatRename(chat.id)}
+                      className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                      autoFocus
+                    />
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onChatSelect(chat.id)}
+                        className={cn(
+                          "flex-1 justify-start truncate text-xs",
+                          currentChatId === chat.id
+                            ? "bg-accent/10 text-accent hover:bg-accent/20"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Star className="mr-1 h-3 w-3 fill-accent text-accent" />
+                        {chat.title}
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
+                            <Star className="mr-2 h-3 w-3" />
+                            Unstar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleRenameChat(chat.id)}>
+                            <Pencil className="mr-2 h-3 w-3" />
+                            Rename
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)}>
+                            <Trash2 className="mr-2 h-3 w-3" />
+                            Delete
+                          </DropdownMenuItem>
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              {chat.folderId && (
+                                <DropdownMenuItem onClick={() => handleMoveToFolder(chat.id, null)}>
+                                  Remove from folder
+                                </DropdownMenuItem>
+                              )}
+                              {folders
+                                .filter((f) => f.id !== chat.folderId)
+                                .map((f) => (
+                                  <DropdownMenuItem
+                                    key={f.id}
+                                    onClick={() => handleMoveToFolder(chat.id, f.id)}
+                                  >
+                                    {f.name}
+                                  </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
+          )}
+
+          {/* Uncategorized Chats */}
+          <div className="space-y-0.5">
+            {!isCollapsed && (
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <div className="text-xs font-medium text-muted-foreground">Recent</div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCreateFolder}
+                  className="h-6 w-6 text-muted-foreground hover:bg-surface-hover"
+                  title="New Folder"
+                >
+                  <FolderPlus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            {filterChats(getUncategorizedChats()).map((chat) => (
+              <div
+                key={chat.id}
+                className="group flex items-center gap-1 rounded-lg hover:bg-surface-hover transition-colors"
+              >
+                {editingChatId === chat.id ? (
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveChatRename(chat.id);
+                      if (e.key === "Escape") cancelChatRename();
+                    }}
+                    onBlur={() => saveChatRename(chat.id)}
+                    className="flex-1 rounded bg-surface px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                    autoFocus
+                  />
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onChatSelect(chat.id)}
+                      className={cn(
+                        "flex-1 justify-start truncate text-xs",
+                        currentChatId === chat.id
+                          ? "bg-accent/10 text-accent hover:bg-accent/20"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {chat.title}
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleStarChat(chat.id)}>
+                          <Star className="mr-2 h-3 w-3" />
+                          Star
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleRenameChat(chat.id)}>
+                          <Pencil className="mr-2 h-3 w-3" />
+                          Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteChat(chat.id)}>
+                          <Trash2 className="mr-2 h-3 w-3" />
+                          Delete
+                        </DropdownMenuItem>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>Move to folder</DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            {folders.map((f) => (
+                              <DropdownMenuItem
+                                key={f.id}
+                                onClick={() => handleMoveToFolder(chat.id, f.id)}
+                              >
+                                {f.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
-        </div>}
+        </div>
+      </ScrollArea>
 
       {/* User Profile */}
       <div className="mt-auto border-t border-border">
-        {!isCollapsed ? <div className="flex items-center gap-3 p-3">
+        {!isCollapsed ? (
+          <div className="flex items-center gap-3 p-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-700">
               <User className="h-4 w-4 text-white" />
             </div>
@@ -294,7 +608,11 @@ export function Sidebar({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-surface-hover">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg hover:bg-surface-hover"
+                >
                   <Settings className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
@@ -318,13 +636,19 @@ export function Sidebar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div> : <div className="flex flex-col items-center gap-2 p-3">
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 p-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-700">
               <User className="h-4 w-4 text-white" />
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-surface-hover">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg hover:bg-surface-hover"
+                >
                   <Settings className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
@@ -348,7 +672,9 @@ export function Sidebar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>}
+          </div>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 }

@@ -32,7 +32,7 @@ export function MessageList({ messages, isStreaming }: MessageListProps) {
   }
 
   return (
-    <ScrollArea className="flex-1 px-4 py-6">
+    <ScrollArea className="flex-1 overflow-hidden px-4 py-6">
       <div className="mx-auto max-w-3xl space-y-6">
         {messages.map((message) => (
           <Message key={message.id} message={message} />

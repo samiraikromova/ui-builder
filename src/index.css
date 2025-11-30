@@ -141,5 +141,16 @@
 }
 
 @layer utilities {
-  /* Removed shimmer animation - using smooth fade transition instead */
+  @keyframes shimmer-border {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(155, 115, 175, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(155, 115, 175, 0.5);
+    }
+  }
+
+  .animate-shimmer-border {
+    animation: shimmer-border 2s ease-in-out infinite;
+  }
 }
