@@ -1,12 +1,11 @@
 import { useState, useRef, KeyboardEvent } from "react";
-import { Send, Paperclip, Mic } from "lucide-react";
+import { Send, Plus, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Project } from "./ChatHeader";
 import { ProjectSelector } from "./ProjectSelector";
-import { ModelSelector } from "./ModelSelector";
-import { ExtendedThinkingToggle } from "./ExtendedThinkingToggle";
+import { ModelThinkingSelector } from "./ModelThinkingSelector";
 
 const mockProjects: Project[] = [
   {
@@ -39,7 +38,7 @@ interface ChatInputProps {
   onSendMessage: (content: string, files?: File[]) => void;
   disabled?: boolean;
   selectedProject: Project | null;
-  onSelectProject: (project: Project) => void;
+  onSelectProject: (project: Project | null) => void;
   selectedModel: string;
   onSelectModel: (modelId: string) => void;
   extendedThinking: boolean;
@@ -87,6 +86,8 @@ export function ChatInput({
     }
   };
 
+  const hasText = message.trim().length > 0;
+
   return (
     <div className={cn("w-full", !isEmptyState && "border-t border-border/50 bg-background p-6")}>
       <div className={cn(!isEmptyState && "mx-auto max-w-4xl")}>
@@ -101,7 +102,7 @@ export function ChatInput({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={disabled}
               >
-                <Paperclip className="h-5 w-5 text-muted-foreground" />
+                <Plus className="h-5 w-5 text-muted-foreground" />
               </Button>
               <input
                 ref={fileInputRef}
@@ -127,7 +128,7 @@ export function ChatInput({
                       key={index}
                       className="flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs text-foreground"
                     >
-                      <Paperclip className="h-3 w-3" />
+                      <Plus className="h-3 w-3" />
                       <span className="max-w-[200px] truncate">{file.name}</span>
                       <button
                         onClick={() => setFiles(files.filter((_, i) => i !== index))}
@@ -152,19 +153,22 @@ export function ChatInput({
 
             {/* Right controls */}
             <div className="flex items-center gap-1">
-              <ExtendedThinkingToggle
-                enabled={extendedThinking}
-                onToggle={onToggleExtendedThinking}
+              <ModelThinkingSelector
+                selectedModel={selectedModel}
+                onSelectModel={onSelectModel}
+                extendedThinking={extendedThinking}
+                onToggleExtendedThinking={onToggleExtendedThinking}
               />
-              <ModelSelector selected={selectedModel} onChange={onSelectModel} />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover"
-                disabled={disabled}
-              >
-                <Mic className="h-5 w-5 text-muted-foreground" />
-              </Button>
+              {!hasText && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 shrink-0 rounded-full hover:bg-surface-hover"
+                  disabled={disabled}
+                >
+                  <Mic className="h-5 w-5 text-muted-foreground" />
+                </Button>
+              )}
               <Button
                 size="icon"
                 className={cn(

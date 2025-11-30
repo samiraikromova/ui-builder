@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ProjectSelector } from "./ProjectSelector";
-import { ModelSelector } from "./ModelSelector";
+import { ModelThinkingSelector } from "./ModelThinkingSelector";
 import { CreditsDisplay } from "./CreditsDisplay";
 
 export interface Project {
@@ -56,8 +56,9 @@ const mockProjects: Project[] = [
 ];
 
 export function ChatHeader() {
-  const [selectedProject, setSelectedProject] = useState<Project>(mockProjects[0]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(mockProjects[0]);
   const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5");
+  const [extendedThinking, setExtendedThinking] = useState(false);
 
   return (
     <div className="flex items-center justify-between border-b border-border bg-surface px-6 py-4">
@@ -67,7 +68,12 @@ export function ChatHeader() {
           selected={selectedProject}
           onChange={setSelectedProject}
         />
-        <ModelSelector selected={selectedModel} onChange={setSelectedModel} />
+        <ModelThinkingSelector
+          selectedModel={selectedModel}
+          onSelectModel={setSelectedModel}
+          extendedThinking={extendedThinking}
+          onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)}
+        />
       </div>
       <CreditsDisplay />
     </div>
