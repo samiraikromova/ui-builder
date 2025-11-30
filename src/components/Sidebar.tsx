@@ -1,8 +1,6 @@
-import { Plus, Settings, User, PanelLeft, LogOut, CreditCard, Sparkles, UserIcon, Pencil, Trash2, FolderInput } from "lucide-react";
-import { Button } from "./ui/button";
-import { ScrollArea } from "./ui/scroll-area";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { PanelLeft, Plus, User, ChevronDown, ChevronRight, Settings, Pencil, Trash2, FolderInput, Folder as FolderIcon, FolderPlus, UserIcon, Sparkles, CreditCard, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,134 +18,357 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+
 interface Chat {
   id: string;
   title: string;
+  folderId?: string;
 }
-const mockChats: Chat[] = [{
-  id: "1",
-  title: "Marketing campaign ideas"
-}, {
-  id: "2",
-  title: "Video script review"
-}, {
-  id: "3",
-  title: "Client proposal draft"
-}, {
-  id: "4",
-  title: "Social media strategy"
-}, {
-  id: "5",
-  title: "Ad copy variations"
-}, {
-  id: "6",
-  title: "Email sequence planning"
-}, {
-  id: "7",
-  title: "Content calendar creation"
-}, {
-  id: "8",
-  title: "Brand voice development"
-}];
+
+interface Folder {
+  id: string;
+  name: string;
+  isOpen: boolean;
+}
+
 interface SidebarProps {
   currentChatId: string | null;
   onChatSelect: (chatId: string) => void;
   onNewChat: () => void;
 }
-export function Sidebar({
-  currentChatId,
-  onChatSelect,
-  onNewChat
-}: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const handleRenameChat = (chatId: string) => {
-    console.log("Rename chat:", chatId);
-    // TODO: Implement rename functionality
+export function Sidebar({ currentChatId, onChatSelect, onNewChat }: SidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  
+  // Chat state
+  const [chats, setChats] = useState<Chat[]>([
+    { id: "1", title: "Marketing campaign ideas" },
+    { id: "2", title: "Video script review" },
+    { id: "3", title: "Client proposal draft" },
+    { id: "4", title: "Social media strategy" },
+    { id: "5", title: "Ad copy variations" },
+  ]);
+  
+  // Folder state
+  const [folders, setFolders] = useState<Folder[]>([
+    { id: "work", name: "Work", isOpen: true },
+    { id: "personal", name: "Personal", isOpen: true },
+  ]);
+  
+  // Editing states
+  const [editingChatId, setEditingChatId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editingFolderName, setEditingFolderName] = useState("");
+
+  // Chat operations
+  const handleRenameChat = (chatId: string, currentTitle: string) => {
+    setEditingChatId(chatId);
+    setEditingTitle(currentTitle);
+  };
+
+  const saveChatRename = () => {
+    if (editingChatId && editingTitle.trim()) {
+      setChats(chats.map(chat => 
+        chat.id === editingChatId ? { ...chat, title: editingTitle.trim() } : chat
+      ));
+    }
+    setEditingChatId(null);
+    setEditingTitle("");
+  };
+
+  const cancelChatRename = () => {
+    setEditingChatId(null);
+    setEditingTitle("");
   };
 
   const handleDeleteChat = (chatId: string) => {
-    console.log("Delete chat:", chatId);
-    // TODO: Implement delete functionality
+    setChats(chats.filter(chat => chat.id !== chatId));
   };
 
-  const handleMoveToFolder = (chatId: string, folder: string) => {
-    console.log("Move chat to folder:", chatId, folder);
-    // TODO: Implement folder move functionality
+  const handleMoveToFolder = (chatId: string, folderId: string | null) => {
+    setChats(chats.map(chat => 
+      chat.id === chatId ? { ...chat, folderId: folderId || undefined } : chat
+    ));
   };
-  return <div className={cn("flex h-full flex-col border-r border-border bg-surface transition-all duration-300 overflow-y-auto flex-shrink-0", isCollapsed ? "w-14" : "w-64")}>
-      {/* Header with hamburger */}
+
+  // Folder operations
+  const handleCreateFolder = () => {
+    const newFolder: Folder = {
+      id: `folder-${Date.now()}`,
+      name: "New Folder",
+      isOpen: true,
+    };
+    setFolders([...folders, newFolder]);
+    setEditingFolderId(newFolder.id);
+    setEditingFolderName(newFolder.name);
+  };
+
+  const handleRenameFolder = (folderId: string, currentName: string) => {
+    setEditingFolderId(folderId);
+    setEditingFolderName(currentName);
+  };
+
+  const saveFolderRename = () => {
+    if (editingFolderId && editingFolderName.trim()) {
+      setFolders(folders.map(folder => 
+        folder.id === editingFolderId ? { ...folder, name: editingFolderName.trim() } : folder
+      ));
+    }
+    setEditingFolderId(null);
+    setEditingFolderName("");
+  };
+
+  const cancelFolderRename = () => {
+    setEditingFolderId(null);
+    setEditingFolderName("");
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    // Move chats back to uncategorized
+    setChats(chats.map(chat => 
+      chat.folderId === folderId ? { ...chat, folderId: undefined } : chat
+    ));
+    setFolders(folders.filter(folder => folder.id !== folderId));
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setFolders(folders.map(folder => 
+      folder.id === folderId ? { ...folder, isOpen: !folder.isOpen } : folder
+    ));
+  };
+
+  // Get chats by category
+  const getChatsInFolder = (folderId: string) => chats.filter(chat => chat.folderId === folderId);
+  const getUncategorizedChats = () => chats.filter(chat => !chat.folderId);
+
+  return (
+    <div
+      className={cn(
+        "flex h-full flex-col border-r border-border bg-surface transition-all duration-300 overflow-y-auto flex-shrink-0",
+        isCollapsed ? "w-14" : "w-64"
+      )}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-border p-3">
-        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="h-8 w-8 rounded-lg hover:bg-surface-hover">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="h-8 w-8 rounded-lg hover:bg-surface-hover"
+        >
           <PanelLeft className="h-4 w-4 text-muted-foreground" />
         </Button>
         {!isCollapsed && <span className="text-sm font-medium text-foreground">Leveraged Creator</span>}
       </div>
 
       {/* New Chat Button */}
-      {!isCollapsed && <div className="p-3">
-          <Button onClick={onNewChat} className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-accent-hover">
+      <div className="p-3">
+        {!isCollapsed ? (
+          <Button
+            onClick={onNewChat}
+            className="w-full justify-start gap-2 bg-primary text-primary-foreground hover:bg-accent-hover"
+          >
             <Plus className="h-4 w-4" />
             New Chat
           </Button>
-        </div>}
-
-      {isCollapsed && <div className="p-3">
-          <Button onClick={onNewChat} variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-surface-hover">
+        ) : (
+          <Button
+            onClick={onNewChat}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg hover:bg-surface-hover"
+          >
             <Plus className="h-4 w-4 text-muted-foreground" />
           </Button>
-        </div>}
+        )}
+      </div>
 
-      {/* Chat History */}
-      {!isCollapsed && <>
-          <div className="px-3 py-2">
-            <p className="text-xs font-medium text-muted-foreground">Recent</p>
-          </div>
-          <ScrollArea className="flex-1 px-2">
-            <div className="space-y-0 pb-3">
-              {mockChats.map(chat => (
-                <ContextMenu key={chat.id}>
+      {/* Chat List */}
+      {!isCollapsed && (
+        <div className="flex-1 overflow-y-auto px-2">
+          {/* Folders */}
+          {folders.map((folder) => (
+            <Collapsible key={folder.id} open={folder.isOpen} onOpenChange={() => toggleFolder(folder.id)}>
+              <div className="flex items-center gap-1 py-2">
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
+                    {folder.isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  </Button>
+                </CollapsibleTrigger>
+                
+                <ContextMenu>
                   <ContextMenuTrigger asChild>
-                    <button 
-                      onClick={() => onChatSelect(chat.id)} 
-                      className={cn(
-                        "flex w-full items-center rounded-lg px-2 py-1.5 text-left text-xs transition-colors", 
-                        currentChatId === chat.id 
-                          ? "bg-surface-hover text-foreground" 
-                          : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
-                      )}
-                    >
-                      <p className="truncate">{chat.title}</p>
-                    </button>
+                    {editingFolderId === folder.id ? (
+                      <Input
+                        value={editingFolderName}
+                        onChange={(e) => setEditingFolderName(e.target.value)}
+                        onBlur={saveFolderRename}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveFolderRename();
+                          if (e.key === "Escape") cancelFolderRename();
+                        }}
+                        autoFocus
+                        className="h-6 text-xs flex-1 bg-muted/50"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-1 flex-1 text-xs text-muted-foreground cursor-pointer">
+                        <FolderIcon className="h-3 w-3" />
+                        <span>{folder.name}</span>
+                      </div>
+                    )}
                   </ContextMenuTrigger>
-                  <ContextMenuContent className="w-48">
-                    <ContextMenuItem onClick={() => handleRenameChat(chat.id)}>
+                  <ContextMenuContent>
+                    <ContextMenuItem onClick={() => handleRenameFolder(folder.id, folder.name)}>
                       <Pencil className="mr-2 h-4 w-4" />
                       Rename
                     </ContextMenuItem>
                     <ContextMenuSeparator />
+                    <ContextMenuItem onClick={() => handleDeleteFolder(folder.id)} className="text-destructive focus:text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
+              </div>
+              
+              <CollapsibleContent className="pl-6 space-y-1">
+                {getChatsInFolder(folder.id).map((chat) => (
+                  <ContextMenu key={chat.id}>
+                    <ContextMenuTrigger asChild>
+                      {editingChatId === chat.id ? (
+                        <Input
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onBlur={saveChatRename}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveChatRename();
+                            if (e.key === "Escape") cancelChatRename();
+                          }}
+                          autoFocus
+                          className="h-7 text-xs bg-muted/50"
+                        />
+                      ) : (
+                        <button
+                          onClick={() => onChatSelect(chat.id)}
+                          className={cn(
+                            "w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors truncate",
+                            currentChatId === chat.id
+                              ? "bg-surface-hover text-foreground"
+                              : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                          )}
+                        >
+                          {chat.title}
+                        </button>
+                      )}
+                    </ContextMenuTrigger>
+                    <ContextMenuContent>
+                      <ContextMenuItem onClick={() => handleRenameChat(chat.id, chat.title)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Rename
+                      </ContextMenuItem>
+                      <ContextMenuSub>
+                        <ContextMenuSubTrigger>
+                          <FolderInput className="mr-2 h-4 w-4" />
+                          Move to folder
+                        </ContextMenuSubTrigger>
+                        <ContextMenuSubContent>
+                          <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, null)}>
+                            Uncategorized
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          {folders.map((f) => (
+                            <ContextMenuItem
+                              key={f.id}
+                              onClick={() => handleMoveToFolder(chat.id, f.id)}
+                            >
+                              {f.name}
+                            </ContextMenuItem>
+                          ))}
+                        </ContextMenuSubContent>
+                      </ContextMenuSub>
+                      <ContextMenuSeparator />
+                      <ContextMenuItem onClick={() => handleDeleteChat(chat.id)} className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
+
+          {/* Recent/Uncategorized chats */}
+          <div className="py-2">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <p className="text-xs text-muted-foreground font-medium">Recent</p>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCreateFolder}
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                title="New Folder"
+              >
+                <FolderPlus className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-1">
+              {getUncategorizedChats().map((chat) => (
+                <ContextMenu key={chat.id}>
+                  <ContextMenuTrigger asChild>
+                    {editingChatId === chat.id ? (
+                      <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={saveChatRename}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveChatRename();
+                          if (e.key === "Escape") cancelChatRename();
+                        }}
+                        autoFocus
+                        className="h-7 text-xs bg-muted/50"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => onChatSelect(chat.id)}
+                        className={cn(
+                          "w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors truncate",
+                          currentChatId === chat.id
+                            ? "bg-surface-hover text-foreground"
+                            : "text-muted-foreground hover:bg-surface-hover hover:text-foreground"
+                        )}
+                      >
+                        {chat.title}
+                      </button>
+                    )}
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem onClick={() => handleRenameChat(chat.id, chat.title)}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Rename
+                    </ContextMenuItem>
                     <ContextMenuSub>
                       <ContextMenuSubTrigger>
                         <FolderInput className="mr-2 h-4 w-4" />
                         Move to folder
                       </ContextMenuSubTrigger>
                       <ContextMenuSubContent>
-                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Work")}>
-                          Work
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Personal")}>
-                          Personal
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={() => handleMoveToFolder(chat.id, "Projects")}>
-                          Projects
-                        </ContextMenuItem>
+                        {folders.map((f) => (
+                          <ContextMenuItem
+                            key={f.id}
+                            onClick={() => handleMoveToFolder(chat.id, f.id)}
+                          >
+                            {f.name}
+                          </ContextMenuItem>
+                        ))}
                       </ContextMenuSubContent>
                     </ContextMenuSub>
                     <ContextMenuSeparator />
-                    <ContextMenuItem 
-                      onClick={() => handleDeleteChat(chat.id)}
-                      className="text-destructive focus:text-destructive"
-                    >
+                    <ContextMenuItem onClick={() => handleDeleteChat(chat.id)} className="text-destructive focus:text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
                     </ContextMenuItem>
@@ -155,12 +376,14 @@ export function Sidebar({
                 </ContextMenu>
               ))}
             </div>
-          </ScrollArea>
-        </>}
+          </div>
+        </div>
+      )}
 
-      {/* User Profile at bottom */}
+      {/* User Profile */}
       <div className="mt-auto border-t border-border">
-        {!isCollapsed ? <div className="flex items-center gap-3 p-3">
+        {!isCollapsed ? (
+          <div className="flex items-center gap-3 p-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-700">
               <User className="h-4 w-4 text-white" />
             </div>
@@ -194,7 +417,9 @@ export function Sidebar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div> : <div className="flex flex-col items-center gap-2 p-3">
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 p-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-700">
               <User className="h-4 w-4 text-white" />
             </div>
@@ -224,7 +449,9 @@ export function Sidebar({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>}
+          </div>
+        )}
       </div>
-    </div>;
+    </div>
+  );
 }
