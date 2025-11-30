@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Search, PlayCircle, CheckCircle2 } from "luc
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ContentToggle } from "./ContentToggle";
+import { ModeSwitcher } from "@/components/ModeSwitcher";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -35,6 +36,8 @@ interface LearnSidebarProps {
   modules: Module[];
   isCollapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
+  mode: "chat" | "learn";
+  onModeChange: (mode: "chat" | "learn") => void;
 }
 
 export const LearnSidebar = ({
@@ -45,6 +48,8 @@ export const LearnSidebar = ({
   modules,
   isCollapsed,
   onCollapsedChange,
+  mode,
+  onModeChange,
 }: LearnSidebarProps) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,18 +67,19 @@ export const LearnSidebar = ({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-border">
+      <div className="flex items-center gap-2 border-b border-border p-3">
         {!isCollapsed && (
-          <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
+          <>
+            <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[80vh]">
               <DialogHeader>
                 <DialogTitle>Search Lessons</DialogTitle>
@@ -117,6 +123,9 @@ export const LearnSidebar = ({
               </div>
             </DialogContent>
           </Dialog>
+          
+          <ModeSwitcher currentMode={mode} onModeChange={onModeChange} />
+        </>
         )}
         <Button
           variant="ghost"
