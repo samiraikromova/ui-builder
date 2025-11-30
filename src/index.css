@@ -143,14 +143,14 @@
 @layer utilities {
   @keyframes shimmer-border {
     0%, 100% {
-      box-shadow: 0 0 15px rgba(155, 115, 175, 0.3);
+      box-shadow: 0 0 20px rgba(106, 67, 120, 0.5);
     }
     50% {
-      box-shadow: 0 0 25px rgba(155, 115, 175, 0.5);
+      box-shadow: 0 0 35px rgba(106, 67, 120, 0.8);
     }
   }
 
   .animate-shimmer-border {
-    animation: shimmer-border 2s ease-in-out infinite;
+    animation: shimmer-border 3s ease-in-out infinite;
   }
 }
