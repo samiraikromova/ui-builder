@@ -76,6 +76,7 @@ export function ChatInput({
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [lineCount, setLineCount] = useState(1);
   const [showFilePreview, setShowFilePreview] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleSend = () => {
@@ -154,14 +155,36 @@ export function ChatInput({
       
       <div className={cn("w-full", !isEmptyState && "border-t border-border/50 bg-background p-6", isFullScreen && "fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm p-6")}>
         <div className={cn(!isEmptyState && !isFullScreen && "mx-auto max-w-2xl", isFullScreen && "w-full max-w-2xl")}>
-          <div className={cn("relative rounded-3xl border border-border/50 bg-surface shadow-lg transition-all duration-500", isDragging && "border-accent bg-accent/5", "focus-within:ring-2 focus-within:ring-accent/50 focus-within:border-accent transition-shadow")} onDragEnter={handleDragEnter} onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+          <div 
+            className={cn(
+              "relative rounded-3xl border transition-all duration-500",
+              isDragging && "border-accent bg-accent/5",
+              isFocused ? "border-accent/50 bg-surface/80 backdrop-blur-sm animate-shimmer-border" : "border-border/50 bg-surface/80 backdrop-blur-sm",
+              isEmptyState && "shadow-lg"
+            )}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
           {/* Top row - Text input with fullscreen button */}
           <div className="px-4 pt-2 relative py-[10px] border-black/0">
             {files.length > 0 && <button onClick={() => setShowFilePreview(true)} className="mb-2 flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs text-foreground hover:bg-accent/20 transition-colors">
                 <Plus className="h-3 w-3" />
                 <span>{files.length} file{files.length > 1 ? 's' : ''} attached</span>
               </button>}
-            <Textarea ref={textareaRef} value={message} onChange={e => setMessage(e.target.value)} onKeyDown={handleKeyDown} placeholder="Enter a prompt" rows={1} disabled={disabled} className="min-h-[24px] max-h-[168px] resize-none border-0 bg-transparent px-0 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none outline-none ring-0 placeholder:text-xs placeholder:text-muted-foreground overflow-y-auto my-[4px]" />
+            <Textarea 
+              ref={textareaRef} 
+              value={message} 
+              onChange={e => setMessage(e.target.value)} 
+              onKeyDown={handleKeyDown} 
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              placeholder="Enter a prompt" 
+              rows={1} 
+              disabled={disabled} 
+              className="min-h-[24px] max-h-[168px] resize-none border-0 bg-transparent px-0 py-0 text-sm focus-visible:ring-0 focus-visible:outline-none outline-none ring-0 placeholder:text-xs placeholder:text-muted-foreground overflow-y-auto my-[4px]" 
+            />
             {lineCount >= 3 && <Button variant="ghost" size="icon" className="absolute top-2 right-2 h-6 w-6 text-muted-foreground hover:text-foreground" onClick={() => setIsFullScreen(!isFullScreen)}>
                 {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
               </Button>}
