@@ -9,7 +9,7 @@ interface Model {
 }
 
 const models: Model[] = [
-  { id: "claude-opus-4", name: "Opus 4.1", description: "Most capable" },
+  { id: "claude-opus-4", name: "Opus 4.5", description: "Most capable" },
   { id: "claude-sonnet-4-5", name: "Sonnet 4.5", description: "Best balance" },
   { id: "claude-haiku-4", name: "Haiku 4", description: "Fastest" },
 ];

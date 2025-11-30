@@ -11,10 +11,22 @@ const mockProjects: Project[] = [
     description: "Vector search integration with personal knowledge base",
   },
   {
+    id: "copywriting",
+    name: "Copywriting Assistant",
+    icon: "✍️",
+    description: "Generate engaging copy for marketing materials",
+  },
+  {
     id: "contract",
     name: "Contract Writer",
     icon: "📄",
     description: "Generate professional contracts and legal documents",
+  },
+  {
+    id: "sales-review",
+    name: "Sales Call Transcript Review",
+    icon: "📞",
+    description: "Analyze and summarize sales call transcripts",
   },
   {
     id: "ad-writing",
@@ -23,10 +35,22 @@ const mockProjects: Project[] = [
     description: "Create compelling ad copy for various platforms",
   },
   {
-    id: "sales-review",
-    name: "Sales Call Review",
-    icon: "📞",
-    description: "Analyze and summarize sales call transcripts",
+    id: "image-gen",
+    name: "Image Ad Generator",
+    icon: "🎨",
+    description: "Generate images for advertisements",
+  },
+  {
+    id: "hooks",
+    name: "AI Hooks Generator",
+    icon: "🎣",
+    description: "Create attention-grabbing hooks for content",
+  },
+  {
+    id: "documentation",
+    name: "Documentation",
+    icon: "📚",
+    description: "Generate and manage technical documentation",
   },
 ];
 
@@ -75,7 +99,7 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [selectedModel, setSelectedModel] = useState("claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState("claude-opus-4");
   const [extendedThinking, setExtendedThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -149,18 +173,18 @@ export function ChatInterface({ chatId, onNewChat }: ChatInterfaceProps) {
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             {mockProjects.map((project) => (
               <button
                 key={project.id}
                 onClick={() => setSelectedProject(project)}
-                className={`flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm transition-all ${
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-all ${
                   selectedProject?.id === project.id
                     ? "border-accent bg-accent/10 text-foreground"
                     : "border-border bg-surface hover:bg-surface-hover text-foreground"
                 }`}
               >
-                <span className="text-base">{project.icon}</span>
+                <span className="text-sm">{project.icon}</span>
                 <span>{project.name}</span>
               </button>
             ))}
