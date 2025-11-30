@@ -188,45 +188,66 @@ export function Sidebar({
 
       {/* User Profile */}
       <div className="mt-auto border-t border-border">
-        {!isCollapsed ? <div className="flex items-center gap-3 p-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <span className="text-sm font-medium">C</span>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-xs font-medium text-foreground">Cameron</p>
-              <p className="truncate text-xs text-muted-foreground">50,993 credits</p>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-surface-hover">
-                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="text-muted-foreground">
-                  <UserIcon className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-muted-foreground">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Upgrade to Pro
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-muted-foreground">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Top up credits
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div> : <div className="flex flex-col items-center gap-2 p-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <span className="text-sm font-medium">C</span>
-            </div>
-          </div>}
+        {!isCollapsed ? <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 p-3 w-full hover:bg-surface-hover transition-colors cursor-pointer">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <span className="text-sm font-medium">C</span>
+                </div>
+                <div className="flex-1 overflow-hidden text-left">
+                  <p className="truncate text-xs font-medium text-foreground">Cameron</p>
+                  <p className="truncate text-xs text-muted-foreground">50,993 credits</p>
+                </div>
+                <ChevronUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem className="text-muted-foreground">
+                <UserIcon className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-muted-foreground">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Upgrade to Pro
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-muted-foreground">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Top up credits
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu> : <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex flex-col items-center gap-2 p-3 w-full hover:bg-surface-hover transition-colors cursor-pointer">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <span className="text-sm font-medium">C</span>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem className="text-muted-foreground">
+                <UserIcon className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-muted-foreground">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Upgrade to Pro
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-muted-foreground">
+                <CreditCard className="mr-2 h-4 w-4" />
+                Top up credits
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>}
       </div>
 
       {/* Search Modal */}
