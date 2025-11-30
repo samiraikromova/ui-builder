@@ -27,16 +27,25 @@ export function ProjectSelector({ projects, selected, onChange }: ProjectSelecto
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 transition-colors hover:bg-surface-hover"
+        className={cn(
+          "flex items-center gap-2 rounded-full px-3 py-2 text-sm transition-colors hover:bg-surface-hover",
+          selected && "bg-accent/10"
+        )}
       >
-        <span className="text-xl">{selected.icon}</span>
-        <span className="text-sm font-medium text-foreground">{selected.name}</span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+        {selected ? (
+          <>
+            <span className="text-base">{selected.icon}</span>
+            <span className="text-foreground">{selected.name}</span>
+          </>
+        ) : (
+          <span className="text-muted-foreground">Tools</span>
+        )}
+        <ChevronDown className={cn("h-3 w-3 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-80 rounded-lg border border-border bg-popover shadow-xl">
-          <div className="max-h-96 overflow-y-auto">
+        <div className="absolute bottom-full left-0 mb-2 w-80 rounded-2xl border border-border bg-popover shadow-xl">
+          <div className="max-h-96 overflow-y-auto p-2">
             {projects.map((project) => (
               <button
                 key={project.id}
@@ -45,14 +54,14 @@ export function ProjectSelector({ projects, selected, onChange }: ProjectSelecto
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-hover",
-                  selected.id === project.id && "bg-surface-hover"
+                  "flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-surface-hover",
+                  selected?.id === project.id && "bg-surface-hover"
                 )}
               >
-                <span className="mt-0.5 text-2xl">{project.icon}</span>
+                <span className="mt-0.5 text-xl">{project.icon}</span>
                 <div className="flex-1">
-                  <div className="font-medium text-foreground">{project.name}</div>
-                  <div className="mt-0.5 text-sm text-muted-foreground">{project.description}</div>
+                  <div className="text-sm font-medium text-foreground">{project.name}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{project.description}</div>
                 </div>
               </button>
             ))}
