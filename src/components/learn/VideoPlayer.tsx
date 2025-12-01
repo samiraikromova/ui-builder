@@ -64,7 +64,7 @@ export const VideoPlayer = ({ lesson, contentType, onAskAI }: VideoPlayerProps) 
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          {contentType === "materials" && lesson.transcript && (
+          {lesson.transcript && (
             <>
               <Button 
                 variant="outline" 
@@ -89,8 +89,8 @@ export const VideoPlayer = ({ lesson, contentType, onAskAI }: VideoPlayerProps) 
           )}
         </div>
 
-        {/* Summary for Course Materials */}
-        {contentType === "materials" && lesson.summary && (
+        {/* Summary */}
+        {lesson.summary && (
           <div className="rounded-xl border border-border bg-surface/50 p-4">
             <h3 className="text-sm font-semibold text-foreground mb-2">Summary</h3>
             <p className="text-sm text-muted-foreground">{lesson.summary}</p>

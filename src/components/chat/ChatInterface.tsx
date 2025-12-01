@@ -4,6 +4,8 @@ import { ChatInput } from "./ChatInput";
 import { Project } from "./ChatHeader";
 import { FileText, X, ArrowDown, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UpgradeDialog } from "./UpgradeDialog";
+import { SubscriptionTier } from "@/types/subscription";
 const mockProjects: Project[] = [{
   id: "cb4",
   name: "CB4",
@@ -104,6 +106,8 @@ export function ChatInterface({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [chatFiles, setChatFiles] = useState<Record<string, File[]>>({});
   const [chatMessages, setChatMessages] = useState<Record<string, Message[]>>(mockMessages);
+  const [userTier, setUserTier] = useState<SubscriptionTier>("starter");
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   
@@ -218,6 +222,11 @@ export function ChatInterface({
     };
   }, []);
   const handleSelectProject = (project: Project | null) => {
+    // Check if user is trying to select a premium project without Pro tier
+    if (project?.isPremium && userTier !== "pro") {
+      setShowUpgradeDialog(true);
+      return;
+    }
     setSelectedProject(project);
   };
   const handleSendMessage = async (content: string, files?: File[]) => {
@@ -351,6 +360,13 @@ export function ChatInterface({
   const showTransition = isTransitioning;
   
   return <div className="flex h-full flex-1 flex-col min-h-0 overflow-hidden relative">
+      {/* Upgrade Dialog */}
+      <UpgradeDialog 
+        open={showUpgradeDialog} 
+        onOpenChange={setShowUpgradeDialog}
+        currentTier={userTier}
+      />
+
       {/* Global drag and drop overlay */}
       {isDraggingGlobal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
@@ -380,6 +396,8 @@ export function ChatInterface({
               isEmptyState={true} 
               externalFiles={currentFiles} 
               onExternalFilesProcessed={handleFilesChange}
+              userTier={userTier}
+              onUpgradeClick={() => setShowUpgradeDialog(true)}
             />
           </div>
 
@@ -415,6 +433,8 @@ export function ChatInterface({
                 isEmptyState={true} 
                 externalFiles={currentFiles} 
                 onExternalFilesProcessed={handleFilesChange}
+                userTier={userTier}
+                onUpgradeClick={() => setShowUpgradeDialog(true)}
               />
             </div>
           </div>
@@ -456,6 +476,8 @@ export function ChatInterface({
               onToggleExtendedThinking={() => setExtendedThinking(!extendedThinking)} 
               externalFiles={currentFiles} 
               onExternalFilesProcessed={handleFilesChange}
+              userTier={userTier}
+              onUpgradeClick={() => setShowUpgradeDialog(true)}
             />
           </div>
         </div>}
