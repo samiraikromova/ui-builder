@@ -11,6 +11,11 @@ interface Chat {
   starred: boolean;
 }
 
+interface TranscriptAttachment {
+  file: File;
+  lessonTitle: string;
+}
+
 const Index = () => {
   const [mode, setMode] = useState<"chat" | "learn">("chat");
   const [chatId, setChatId] = useState<string | null>(null);
@@ -39,6 +44,7 @@ const Index = () => {
   // Learn mode state
   const [lessonId, setLessonId] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"recordings" | "materials">("materials");
+  const [transcriptForNewChat, setTranscriptForNewChat] = useState<File | null>(null);
   
   // Call Recordings Data
   const [recordingsData, setRecordingsData] = useState<Module[]>([
@@ -172,27 +178,108 @@ The discussion highlighted a market shift favoring authentic, human interactions
       id: "course-1",
       title: "Getting Started",
       lessons: [
-        { id: "mat-1", moduleId: "course-1", title: "Introduction to the Platform", duration: "5:30", completed: true, description: "Welcome to the platform! Learn the basics and get oriented with the key features." },
-        { id: "mat-2", moduleId: "course-1", title: "Setting Up Your Workspace", duration: "8:45", completed: false, description: "Step-by-step guide to configuring your workspace for optimal productivity." },
-        { id: "mat-3", moduleId: "course-1", title: "Understanding the Interface", duration: "12:20", completed: false, description: "Deep dive into the user interface and navigation patterns." },
+        { 
+          id: "mat-1", 
+          moduleId: "course-1", 
+          title: "Introduction to the Platform", 
+          duration: "5:30", 
+          completed: true, 
+          description: "Welcome to the platform! Learn the basics and get oriented with the key features.",
+          summary: "This lesson covers the platform overview, key features, navigation basics, and your first steps to getting started.",
+          transcript: "Welcome everyone to this introduction to the platform. In this lesson, we'll cover the essential features that make our platform powerful and easy to use. Let's start by exploring the main dashboard..."
+        },
+        { 
+          id: "mat-2", 
+          moduleId: "course-1", 
+          title: "Setting Up Your Workspace", 
+          duration: "8:45", 
+          completed: false, 
+          description: "Step-by-step guide to configuring your workspace for optimal productivity.",
+          summary: "Learn how to customize your workspace layout, set preferences, configure notifications, and organize your projects for maximum efficiency.",
+          transcript: "Now that you're familiar with the basics, let's set up your workspace. A well-configured workspace can dramatically improve your productivity. First, let's look at the layout options..."
+        },
+        { 
+          id: "mat-3", 
+          moduleId: "course-1", 
+          title: "Understanding the Interface", 
+          duration: "12:20", 
+          completed: false, 
+          description: "Deep dive into the user interface and navigation patterns.",
+          summary: "Comprehensive walkthrough of the interface elements, keyboard shortcuts, navigation patterns, and tips for efficient workflow.",
+          transcript: "In this lesson, we'll take a deep dive into the user interface. Understanding how to navigate efficiently will save you hours of time. Let's start with the sidebar navigation..."
+        },
       ],
     },
     {
       id: "course-2",
       title: "Core Concepts",
       lessons: [
-        { id: "mat-4", moduleId: "course-2", title: "Working with Projects", duration: "15:10", completed: false, description: "Learn how to create, manage, and organize projects effectively." },
-        { id: "mat-5", moduleId: "course-2", title: "Advanced Features", duration: "18:30", completed: false, description: "Explore powerful advanced features to enhance your workflow." },
-        { id: "mat-6", moduleId: "course-2", title: "Collaboration Tools", duration: "10:45", completed: false, description: "Master team collaboration and communication features." },
+        { 
+          id: "mat-4", 
+          moduleId: "course-2", 
+          title: "Working with Projects", 
+          duration: "15:10", 
+          completed: false, 
+          description: "Learn how to create, manage, and organize projects effectively.",
+          summary: "Master project creation, organization strategies, team collaboration, and project lifecycle management from start to finish.",
+          transcript: "Projects are the foundation of your work in this platform. Let's explore how to create, organize, and manage projects effectively. We'll start with creating your first project..."
+        },
+        { 
+          id: "mat-5", 
+          moduleId: "course-2", 
+          title: "Advanced Features", 
+          duration: "18:30", 
+          completed: false, 
+          description: "Explore powerful advanced features to enhance your workflow.",
+          summary: "Discover advanced tools including automation, custom integrations, advanced search, and power-user features that will transform your workflow.",
+          transcript: "Welcome to advanced features. These powerful tools will take your productivity to the next level. Let's explore automation capabilities first..."
+        },
+        { 
+          id: "mat-6", 
+          moduleId: "course-2", 
+          title: "Collaboration Tools", 
+          duration: "10:45", 
+          completed: false, 
+          description: "Master team collaboration and communication features.",
+          summary: "Learn real-time collaboration, commenting, version control, team permissions, and communication best practices for effective teamwork.",
+          transcript: "Collaboration is key to successful projects. In this lesson, we'll cover all the collaboration tools available. Starting with real-time editing features..."
+        },
       ],
     },
     {
       id: "course-3",
       title: "Advanced Topics",
       lessons: [
-        { id: "mat-7", moduleId: "course-3", title: "Automation & Workflows", duration: "22:15", completed: false, description: "Automate repetitive tasks and build custom workflows." },
-        { id: "mat-8", moduleId: "course-3", title: "Integration Strategies", duration: "14:50", completed: false, description: "Connect with external tools and services seamlessly." },
-        { id: "mat-9", moduleId: "course-3", title: "Best Practices", duration: "16:30", completed: false, description: "Learn industry best practices and optimization techniques." },
+        { 
+          id: "mat-7", 
+          moduleId: "course-3", 
+          title: "Automation & Workflows", 
+          duration: "22:15", 
+          completed: false, 
+          description: "Automate repetitive tasks and build custom workflows.",
+          summary: "Create powerful automations, design custom workflows, set up triggers and actions, and eliminate repetitive manual tasks.",
+          transcript: "Automation is where the real power lies. In this comprehensive lesson, we'll build custom workflows that automate your repetitive tasks. Let's begin with workflow fundamentals..."
+        },
+        { 
+          id: "mat-8", 
+          moduleId: "course-3", 
+          title: "Integration Strategies", 
+          duration: "14:50", 
+          completed: false, 
+          description: "Connect with external tools and services seamlessly.",
+          summary: "Connect third-party tools, set up API integrations, use webhooks, and create a unified workflow across all your business tools.",
+          transcript: "Integrations allow you to connect all your tools together. We'll explore how to integrate with popular services and create custom API connections. Starting with OAuth setup..."
+        },
+        { 
+          id: "mat-9", 
+          moduleId: "course-3", 
+          title: "Best Practices", 
+          duration: "16:30", 
+          completed: false, 
+          description: "Learn industry best practices and optimization techniques.",
+          summary: "Discover proven strategies for project organization, team collaboration, performance optimization, security best practices, and scaling your operations.",
+          transcript: "Let's wrap up with best practices learned from thousands of successful users. These tips will help you avoid common pitfalls and maximize your results. First, let's talk about project structure..."
+        },
       ],
     },
   ]);
@@ -230,6 +317,27 @@ The discussion highlighted a market shift favoring authentic, human interactions
     })));
   };
 
+  const handleAskAIAboutVideo = (lessonId: string) => {
+    const allLessons = currentModules.flatMap(m => m.lessons);
+    const lesson = allLessons.find(l => l.id === lessonId);
+    
+    if (!lesson?.transcript) return;
+    
+    // Create a File object from the transcript text
+    const transcriptFile = new File(
+      [lesson.transcript], 
+      `${lesson.title.replace(/[^a-zA-Z0-9]/g, '_')}_transcript.txt`,
+      { type: 'text/plain' }
+    );
+    
+    // Store the transcript to attach to new chat
+    setTranscriptForNewChat(transcriptFile);
+    
+    // Switch to chat mode and start new chat
+    setMode("chat");
+    setChatId(null);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {mode === "chat" ? (
@@ -249,6 +357,8 @@ The discussion highlighted a market shift favoring authentic, human interactions
             chatId={chatId} 
             onNewChat={handleNewChat}
             onCreateChat={handleCreateChat}
+            transcriptFile={transcriptForNewChat}
+            onTranscriptFileProcessed={() => setTranscriptForNewChat(null)}
           />
         </div>
       ) : (
@@ -269,6 +379,7 @@ The discussion highlighted a market shift favoring authentic, human interactions
             lessonId={lessonId}
             modules={currentModules}
             contentType={contentType}
+            onAskAI={handleAskAIAboutVideo}
           />
         </div>
       )}

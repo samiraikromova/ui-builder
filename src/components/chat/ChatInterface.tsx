@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { Project } from "./ChatHeader";
-import { FileText, X, ArrowDown } from "lucide-react";
+import { FileText, X, ArrowDown, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 const mockProjects: Project[] = [{
   id: "cb4",
@@ -33,17 +33,20 @@ const mockProjects: Project[] = [{
   id: "image-gen",
   name: "Image Ad Generator",
   icon: "🎨",
-  description: "Generate images for advertisements"
+  description: "Generate images for advertisements",
+  isPremium: true
 }, {
   id: "hooks",
   name: "AI Hooks Generator",
   icon: "🎣",
-  description: "Create attention-grabbing hooks for content"
+  description: "Create attention-grabbing hooks for content",
+  isPremium: true
 }, {
   id: "documentation",
   name: "Documentation",
   icon: "📚",
-  description: "Generate and manage technical documentation"
+  description: "Generate and manage technical documentation",
+  isPremium: true
 }];
 interface Message {
   id: string;
@@ -55,6 +58,8 @@ interface ChatInterfaceProps {
   chatId: string | null;
   onNewChat: () => void;
   onCreateChat: (firstMessage: string) => void;
+  transcriptFile?: File | null;
+  onTranscriptFileProcessed?: () => void;
 }
 const mockMessages: Record<string, Message[]> = {
   "1": [{
@@ -83,7 +88,9 @@ const mockMessages: Record<string, Message[]> = {
 export function ChatInterface({
   chatId,
   onNewChat,
-  onCreateChat
+  onCreateChat,
+  transcriptFile,
+  onTranscriptFileProcessed
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -114,6 +121,14 @@ export function ChatInterface({
       setExternalFiles([]);
     }
   }, [chatId, chatMessages]);
+
+  // Handle transcript file from Learn mode
+  useEffect(() => {
+    if (transcriptFile && !chatId) {
+      setExternalFiles([transcriptFile]);
+      onTranscriptFileProcessed?.();
+    }
+  }, [transcriptFile, chatId]);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth"
@@ -371,7 +386,15 @@ export function ChatInterface({
           <div style={{
         animationDelay: '0.2s'
       }} className="mt-8 flex flex-wrap max-w-xl animate-fade-in justify-center mx-0 gap-[6px] px-[8px]">
-            {mockProjects.map(project => <button key={project.id} onClick={() => setSelectedProject(project)} className={`flex items-center justify-center text-center rounded-lg border px-3 py-2 transition-all duration-200 whitespace-nowrap ${selectedProject?.id === project.id ? "border-accent bg-accent/10 text-muted-foreground" : "border-border/30 bg-surface/50 hover:bg-surface-hover text-muted-foreground"}`}>
+            {mockProjects.map(project => <button key={project.id} onClick={() => setSelectedProject(project)} className={cn(
+                "flex items-center justify-center text-center rounded-lg border px-3 py-2 transition-all duration-200 whitespace-nowrap",
+                selectedProject?.id === project.id 
+                  ? "border-accent bg-accent/10 text-muted-foreground"
+                  : project.isPremium
+                    ? "border-primary/50 bg-primary/20 text-primary-foreground/80"
+                    : "border-border/30 bg-surface/50 hover:bg-surface-hover text-muted-foreground"
+              )}>
+                {project.isPremium && <Lock className="h-3 w-3 mr-1.5" />}
                 <span className="text-xs">{project.name}</span>
               </button>)}
           </div>
