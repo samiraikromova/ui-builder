@@ -28,6 +28,9 @@ export interface Lesson {
   completed?: boolean;
   description?: string;
   embedUrl?: string;
+  transcript?: string;
+  summary?: string;
+  transcriptUrl?: string;
 }
 
 interface LearnSidebarProps {
@@ -59,9 +62,14 @@ export const LearnSidebar = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const allLessons = modules.flatMap(m => m.lessons);
-  const filteredLessons = allLessons.filter(lesson =>
-    lesson.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredLessons = allLessons.filter(lesson => {
+    const query = searchQuery.toLowerCase();
+    return (
+      lesson.title.toLowerCase().includes(query) ||
+      lesson.description?.toLowerCase().includes(query) ||
+      lesson.summary?.toLowerCase().includes(query)
+    );
+  });
 
   const highlightMatch = (text: string, query: string) => {
     if (!query) return text;

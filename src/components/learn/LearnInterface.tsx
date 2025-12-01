@@ -6,9 +6,10 @@ interface LearnInterfaceProps {
   lessonId: string | null;
   modules: Module[];
   contentType: "recordings" | "materials";
+  onAskAI?: (lessonId: string) => void;
 }
 
-export const LearnInterface = ({ lessonId, modules, contentType }: LearnInterfaceProps) => {
+export const LearnInterface = ({ lessonId, modules, contentType, onAskAI }: LearnInterfaceProps) => {
   const allLessons = modules.flatMap(m => m.lessons);
   const selectedLesson = allLessons.find(l => l.id === lessonId);
 
@@ -37,7 +38,7 @@ export const LearnInterface = ({ lessonId, modules, contentType }: LearnInterfac
   return (
     <div className="flex-1 bg-background overflow-y-auto">
       <div className="max-w-[1000px] mx-auto px-8 py-8">
-        <VideoPlayer lesson={selectedLesson} />
+        <VideoPlayer lesson={selectedLesson} contentType={contentType} onAskAI={onAskAI} />
       </div>
     </div>
   );

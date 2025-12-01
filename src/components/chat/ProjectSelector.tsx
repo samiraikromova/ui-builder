@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Zap } from "lucide-react";
+import { X, Zap, Lock } from "lucide-react";
 import { Project } from "./ChatHeader";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -58,8 +58,14 @@ export function ProjectSelector({
                 {projects.map(project => <button key={project.id} onClick={() => {
               onChange(project);
               setOpen(false);
-            }} className={cn("flex w-full items-center rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover", selected?.id === project.id && "bg-surface-hover")}>
+            }} className={cn(
+                "flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover", 
+                selected?.id === project.id && "bg-surface-hover",
+                project.isPremium && "text-primary-foreground/80"
+              )}>
+                    {project.isPremium && <Lock className="h-3 w-3" />}
                     <span className="text-xs text-muted-foreground">{project.name}</span>
+                    {project.isPremium && <span className="ml-auto text-[10px] text-primary-foreground/60">Pro</span>}
                   </button>)}
               </div>
             </div>
