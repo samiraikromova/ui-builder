@@ -139,6 +139,7 @@ The discussion highlighted a market shift favoring authentic, human interactions
 - Emphasis on diversified content strategies, including YouTube and podcasting, was discussed as a way to build authority, attract talent, and create sustainable demand over time (01:01:05).
 - Cam's philosophy centers on "time in the market beats timing the market," encouraging consistent effort and follow-up as the path to long-term success (33:31).
 - Team members are encouraged to build authentic brands aligned with their ideal clients, avoiding generic or overly polished messaging that attracts the wrong audience (17:48).`,
+          transcript: "[Paste transcript content from Fireflies here - This is a placeholder for the LC Group Call 11/28 transcript]",
           embedUrl: "https://share.fireflies.ai/embed/meetings/01KB6J9WXW8YAXJDWBH07AY4A8"
         },
         { 
@@ -148,6 +149,7 @@ The discussion highlighted a market shift favoring authentic, human interactions
           duration: "~45 min", 
           completed: false, 
           description: "Weekly group call discussion",
+          transcript: "[Paste transcript content from Fireflies here - This is a placeholder for the LC Group Call 11/20 transcript]",
           embedUrl: "https://share.fireflies.ai/embed/meetings/01KAHZD1SWVAN3J5X6WX6BDHMA"
         },
         { 
@@ -157,6 +159,7 @@ The discussion highlighted a market shift favoring authentic, human interactions
           duration: "~45 min", 
           completed: false, 
           description: "Weekly group call discussion",
+          transcript: "[Paste transcript content from Fireflies here - This is a placeholder for the LC Group Call 11/13 transcript]",
           embedUrl: "https://share.fireflies.ai/embed/meetings/01K9ZZ0RCWY3Y36E6PBAMSTNWB"
         },
         { 
@@ -166,6 +169,7 @@ The discussion highlighted a market shift favoring authentic, human interactions
           duration: "~45 min", 
           completed: false, 
           description: "Weekly group call discussion",
+          transcript: "[Paste transcript content from Fireflies here - This is a placeholder for the LC Group Call 11/6 transcript]",
           embedUrl: "https://share.fireflies.ai/embed/meetings/01K9DXB7TGMMGXECZ6C265MFES"
         },
       ],

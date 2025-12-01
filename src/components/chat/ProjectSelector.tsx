@@ -3,15 +3,21 @@ import { X, Zap, Lock } from "lucide-react";
 import { Project } from "./ChatHeader";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { SubscriptionTier } from "@/types/subscription";
+
 interface ProjectSelectorProps {
   projects: Project[];
   selected: Project | null;
   onChange: (project: Project | null) => void;
+  userTier?: SubscriptionTier;
+  onUpgradeClick?: () => void;
 }
 export function ProjectSelector({
   projects,
   selected,
-  onChange
+  onChange,
+  userTier = "starter",
+  onUpgradeClick
 }: ProjectSelectorProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -56,6 +62,12 @@ export function ProjectSelector({
               
               <div className="max-h-80 overflow-y-auto">
                 {projects.map(project => <button key={project.id} onClick={() => {
+              // Check if premium project and user doesn't have Pro tier
+              if (project.isPremium && userTier !== "pro") {
+                onUpgradeClick?.();
+                setOpen(false);
+                return;
+              }
               onChange(project);
               setOpen(false);
             }} className={cn(

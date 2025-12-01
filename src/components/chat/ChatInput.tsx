@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Project } from "./ChatHeader";
 import { ProjectSelector } from "./ProjectSelector";
 import { ModelThinkingSelector } from "./ModelThinkingSelector";
+import { SubscriptionTier } from "@/types/subscription";
 const mockProjects: Project[] = [{
   id: "cb4",
   name: "CB4",
@@ -60,6 +61,8 @@ interface ChatInputProps {
   isEmptyState?: boolean;
   externalFiles?: File[];
   onExternalFilesProcessed?: (files: File[]) => void;
+  userTier?: SubscriptionTier;
+  onUpgradeClick?: () => void;
 }
 export function ChatInput({
   onSendMessage,
@@ -72,7 +75,9 @@ export function ChatInput({
   onToggleExtendedThinking,
   isEmptyState = false,
   externalFiles = [],
-  onExternalFilesProcessed
+  onExternalFilesProcessed,
+  userTier = "starter",
+  onUpgradeClick
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -296,7 +301,13 @@ export function ChatInput({
                   </button>
                   <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} accept="*/*" />
                   
-                  <ProjectSelector projects={mockProjects} selected={selectedProject} onChange={onSelectProject} />
+                  <ProjectSelector 
+                    projects={mockProjects} 
+                    selected={selectedProject} 
+                    onChange={onSelectProject}
+                    userTier={userTier}
+                    onUpgradeClick={onUpgradeClick}
+                  />
                   
                   <Tooltip>
                     <TooltipTrigger asChild>
