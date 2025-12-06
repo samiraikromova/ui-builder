@@ -3,60 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
 import { Project } from "./ChatHeader";
-import { FileText, X, ArrowDown, Lock } from "lucide-react";
+import { FileText, Lock, ArrowDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UpgradeDialog } from "./UpgradeDialog";
 import { SubscriptionTier } from "@/types/subscription";
-const mockProjects: Project[] = [{
-  id: "cb4",
-  name: "CB4",
-  icon: "🧠",
-  description: "Vector search integration with personal knowledge base"
-}, {
-  id: "copywriting",
-  name: "Copywriting Assistant",
-  icon: "✍️",
-  description: "Generate engaging copy for marketing materials"
-}, {
-  id: "contract",
-  name: "Contract Writer",
-  icon: "📄",
-  description: "Generate professional contracts and legal documents"
-}, {
-  id: "sales-review",
-  name: "Sales Call Review",
-  icon: "📞",
-  description: "Analyze and summarize sales call transcripts"
-}, {
-  id: "ad-writing",
-  name: "Ad Writing",
-  icon: "📢",
-  description: "Create compelling ad copy for various platforms"
-}, {
-  id: "image-gen",
-  name: "Image Ad Generator",
-  icon: "🎨",
-  description: "Generate images for advertisements",
-  isPremium: true
-}, {
-  id: "hooks",
-  name: "AI Hooks Generator",
-  icon: "🎣",
-  description: "Create attention-grabbing hooks for content",
-  isPremium: true
-}, {
-  id: "documentation",
-  name: "Documentation",
-  icon: "📚",
-  description: "Generate and manage technical documentation",
-  isPremium: true
-}];
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
+import { sendChatMessage, estimateTokens, calculateChatCost } from "@/lib/n8n";
+import { toast } from "@/hooks/use-toast";
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
 }
+
 interface ChatInterfaceProps {
   chatId: string | null;
   onNewChat: () => void;
@@ -64,29 +26,16 @@ interface ChatInterfaceProps {
   transcriptFile?: File | null;
   onTranscriptFileProcessed?: () => void;
 }
-const mockMessages: Record<string, Message[]> = {
-  "1": [{
-    id: "1",
-    role: "user",
-    content: "Can you help me brainstorm marketing campaign ideas for our new product launch?",
-    timestamp: "2:30 PM"
-  }, {
-    id: "2",
-    role: "assistant",
-    content: "I'd be happy to help you brainstorm marketing campaign ideas! To give you the most relevant suggestions, could you tell me a bit more about:\n\n1. What type of product are you launching?\n2. Who is your target audience?\n3. What's your approximate marketing budget?\n4. What channels are you considering (social media, email, paid ads, etc.)?\n\nOnce I understand these details, I can provide tailored campaign ideas that align with your goals.",
-    timestamp: "2:30 PM"
-  }, {
-    id: "3",
-    role: "user",
-    content: "It's a video editing software for content creators. Budget is around $10k for the first month.",
-    timestamp: "2:32 PM"
-  }, {
-    id: "4",
-    role: "assistant",
-    content: "Great! With a video editing software for content creators and a $10k monthly budget, here are some campaign ideas:\n\n**1. Creator Showcase Campaign**\n- Partner with 5-10 micro-influencers to create \"before/after\" videos\n- Show their editing workflow transformation\n- Budget: ~$4k for influencer fees\n\n**2. \"Edit Like a Pro\" Tutorial Series**\n- Create YouTube tutorials showcasing unique features\n- Short-form content for TikTok/Instagram Reels\n- Budget: ~$2k for production\n\n**3. Free Trial + Community Challenge**\n- 14-day free trial with a editing challenge\n- Winners get featured + 1-year free subscription\n- Budget: ~$2k for prizes and promotion\n\n**4. Paid Social Ads**\n- Targeted Facebook/Instagram ads to video creators\n- Retargeting campaigns for website visitors\n- Budget: ~$2k\n\nWould you like me to elaborate on any of these ideas?",
-    timestamp: "2:33 PM"
-  }]
-};
+
+interface SupabaseProject {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  system_prompt: string;
+  icon: string | null;
+  requires_tier2: boolean;
+}
 
 export function ChatInterface({
   chatId,
@@ -95,6 +44,7 @@ export function ChatInterface({
   transcriptFile,
   onTranscriptFileProcessed
 }: ChatInterfaceProps) {
+  const { user, profile, refreshProfile } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -106,27 +56,84 @@ export function ChatInterface({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [chatFiles, setChatFiles] = useState<Record<string, File[]>>({});
-  const [chatMessages, setChatMessages] = useState<Record<string, Message[]>>(mockMessages);
   const [userTier, setUserTier] = useState<SubscriptionTier>("starter");
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
   // Get current chat's files
   const currentFiles = chatId ? (chatFiles[chatId] || []) : externalFiles;
+
+  // Load projects from Supabase
   useEffect(() => {
-    if (chatId) {
-      // Load messages for existing chat
-      setMessages(chatMessages[chatId] || []);
+    const loadProjects = async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name, slug, description, system_prompt, icon, requires_tier2')
+        .eq('is_active', true)
+        .order('name');
+
+      if (data && !error) {
+        const mappedProjects: Project[] = data.map((p: SupabaseProject) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          icon: p.icon || "🤖",
+          description: p.description || "",
+          isPremium: p.requires_tier2,
+          systemPrompt: p.system_prompt
+        }));
+        setProjects(mappedProjects);
+      }
+    };
+    loadProjects();
+  }, []);
+
+  // Set user tier from profile
+  useEffect(() => {
+    if (profile?.subscription_tier) {
+      setUserTier(profile.subscription_tier as SubscriptionTier);
+    }
+  }, [profile]);
+
+  // Load messages for existing chat
+  useEffect(() => {
+    if (chatId && user) {
+      loadMessages(chatId);
     } else {
       setMessages([]);
+      setCurrentThreadId(null);
     }
-    // Clear external files when switching to an existing chat
     if (chatId && externalFiles.length > 0) {
       setExternalFiles([]);
     }
-  }, [chatId, chatMessages]);
+  }, [chatId, user]);
+
+  const loadMessages = async (threadId: string) => {
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('thread_id', threadId)
+      .order('created_at', { ascending: true });
+
+    if (data) {
+      const mapped = data.map(m => ({
+        id: m.id,
+        role: m.role as "user" | "assistant",
+        content: m.content,
+        timestamp: new Date(m.created_at).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit"
+        })
+      }));
+      setMessages(mapped);
+      setCurrentThreadId(threadId);
+    }
+  };
 
   // Handle transcript file from Learn mode
   useEffect(() => {
@@ -224,34 +231,97 @@ export function ChatInterface({
     };
   }, []);
   const handleSelectProject = (project: Project | null) => {
-    // Check if user is trying to select a premium project without Pro tier
     if (project?.isPremium && userTier !== "pro") {
       navigate("/settings");
       return;
     }
     setSelectedProject(project);
+    // Set system prompt when project is selected
+    if (project && 'systemPrompt' in project) {
+      setSystemPrompt((project as any).systemPrompt || "");
+    }
   };
-  const handleSendMessage = async (content: string, files?: File[]) => {
-    const isFirstMessage = messages.length === 0;
-    let activeChatId = chatId;
+
+  const uploadFiles = async (files: File[]): Promise<Array<{ url: string; name: string; type?: string; size?: number }>> => {
+    if (!user) return [];
+    const uploaded: Array<{ url: string; name: string; type?: string; size?: number }> = [];
     
-    // If this is a new chat (no chatId), create it
-    if (!chatId && isFirstMessage) {
-      activeChatId = Date.now().toString();
+    for (const file of files) {
+      const filePath = `${user.id}/${Date.now()}-${file.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('chat-files')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadErr) {
+        console.error('Upload error:', uploadErr);
+        continue;
+      }
+
+      const { data } = supabase.storage.from('chat-files').getPublicUrl(filePath);
+      if (data?.publicUrl) {
+        uploaded.push({
+          url: data.publicUrl,
+          name: file.name,
+          type: file.type,
+          size: file.size
+        });
+      }
+    }
+    return uploaded;
+  };
+
+  const handleSendMessage = async (content: string, files?: File[]) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to send messages",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const isFirstMessage = messages.length === 0;
+    let activeThreadId = currentThreadId;
+    
+    // Create thread if first message
+    if (!activeThreadId && isFirstMessage) {
+      const { data: thread, error: threadError } = await supabase
+        .from('chat_threads')
+        .insert({
+          user_id: user.id,
+          project_id: selectedProject?.id || null,
+          title: content.substring(0, 50),
+          model: selectedModel,
+        })
+        .select()
+        .single();
+
+      if (threadError || !thread) {
+        console.error('Thread creation failed:', threadError);
+        toast({
+          title: 'Error',
+          description: 'Failed to create chat thread',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      activeThreadId = thread.id;
+      setCurrentThreadId(activeThreadId);
       onCreateChat(content);
-      
+
       // Transfer external files to the new chat
       if (externalFiles.length > 0) {
         setChatFiles(prev => ({
           ...prev,
-          [activeChatId!]: externalFiles
+          [activeThreadId!]: externalFiles
         }));
         setExternalFiles([]);
       }
     }
 
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
       role: "user",
       content,
       timestamp: new Date().toLocaleTimeString("en-US", {
@@ -260,92 +330,148 @@ export function ChatInterface({
       })
     };
 
-    // If it's the first message, trigger transition animation
+    // Add user message optimistically
     if (isFirstMessage) {
       setIsTransitioning(true);
-      // Wait for animation to complete before showing messages
       setTimeout(() => {
-        const updatedMessages = [newMessage];
-        setMessages(updatedMessages);
-        
-        // Store messages in chat history
-        if (activeChatId) {
-          setChatMessages(prev => ({
-            ...prev,
-            [activeChatId!]: updatedMessages
-          }));
-        }
-        
-        setIsStreaming(true);
+        setMessages([newMessage]);
         setIsTransitioning(false);
-        
-        // Simulate AI response
-        setTimeout(() => {
-          const aiResponse: Message = {
-            id: (Date.now() + 1).toString(),
-            role: "assistant",
-            content: "This is a demo response. In the full version, this would be connected to Claude AI for intelligent responses based on the selected project and model.",
-            timestamp: new Date().toLocaleTimeString("en-US", {
-              hour: "numeric",
-              minute: "2-digit"
-            })
-          };
-          const finalMessages = [...updatedMessages, aiResponse];
-          setMessages(finalMessages);
-          
-          // Update chat history with AI response
-          if (activeChatId) {
-            setChatMessages(prev => ({
-              ...prev,
-              [activeChatId!]: finalMessages
-            }));
-          }
-          
-          setIsStreaming(false);
-        }, 1000);
+        setIsStreaming(true);
       }, 600);
     } else {
-      // Not first message, add immediately
-      const updatedMessages = [...messages, newMessage];
-      setMessages(updatedMessages);
-      
-      // Store messages in chat history
-      if (activeChatId) {
-        setChatMessages(prev => ({
-          ...prev,
-          [activeChatId!]: updatedMessages
-        }));
-      }
-      
+      setMessages(prev => [...prev, newMessage]);
       setIsStreaming(true);
-
-      // Simulate AI response
-      setTimeout(() => {
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "This is a demo response. In the full version, this would be connected to Claude AI for intelligent responses based on the selected project and model.",
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit"
-          })
-        };
-        const finalMessages = [...updatedMessages, aiResponse];
-        setMessages(finalMessages);
-        
-        // Update chat history with AI response
-        if (activeChatId) {
-          setChatMessages(prev => ({
-            ...prev,
-            [activeChatId!]: finalMessages
-          }));
-        }
-        
-        setIsStreaming(false);
-      }, 1000);
     }
-    
-    // DO NOT clear files after sending - they persist as context
+
+    try {
+      // Upload files if any
+      let fileObjs: any[] = [];
+      if (files && files.length > 0) {
+        fileObjs = await uploadFiles(files);
+      }
+
+      // Save user message to Supabase
+      const { data: savedUserMsg, error: userMsgError } = await supabase
+        .from('messages')
+        .insert({
+          thread_id: activeThreadId,
+          role: 'user',
+          content: content,
+          model: selectedModel,
+        })
+        .select()
+        .single();
+
+      if (userMsgError) {
+        console.error('Failed to save user message:', userMsgError);
+        toast({
+          title: 'Error',
+          description: 'Failed to save message',
+          variant: 'destructive'
+        });
+        setIsStreaming(false);
+        return;
+      }
+
+      // Update temp message with real ID
+      setMessages(prev => prev.map(m => 
+        m.id === newMessage.id ? { ...m, id: savedUserMsg.id } : m
+      ));
+
+      // Build conversation history for context
+      const conversationHistory = messages.map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      // Call n8n webhook
+      const n8nResult = await sendChatMessage({
+        message: content,
+        userId: user.id,
+        projectId: selectedProject?.id || 'default',
+        projectSlug: selectedProject?.slug || 'default',
+        model: selectedModel,
+        threadId: activeThreadId,
+        fileUrls: fileObjs,
+        systemPrompt: systemPrompt,
+        conversationHistory
+      });
+
+      const aiReply = n8nResult.reply || n8nResult.output || 'No response received';
+
+      // Calculate and deduct credits
+      const inputTokens = estimateTokens(
+        systemPrompt +
+        conversationHistory.map(m => m.content).join('\n') +
+        content
+      );
+      const outputTokens = estimateTokens(aiReply);
+      const cost = calculateChatCost(selectedModel, inputTokens, outputTokens);
+
+      // Deduct credits
+      const { data: userData } = await supabase
+        .from('users')
+        .select('credits')
+        .eq('id', user.id)
+        .single();
+
+      if (userData) {
+        const newCredits = Number(userData.credits) - cost;
+        await supabase
+          .from('users')
+          .update({
+            credits: newCredits,
+            last_credit_update: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        // Log usage
+        await supabase.from('usage_logs').insert({
+          user_id: user.id,
+          model: selectedModel,
+          tokens_input: inputTokens,
+          tokens_output: outputTokens,
+          estimated_cost: cost,
+        });
+
+        refreshProfile();
+      }
+
+      // Save assistant message to Supabase
+      const { data: assistantMessage } = await supabase
+        .from('messages')
+        .insert({
+          thread_id: activeThreadId,
+          role: 'assistant',
+          content: aiReply,
+          model: selectedModel,
+          tokens_used: inputTokens + outputTokens,
+        })
+        .select()
+        .single();
+
+      // Add assistant message to UI
+      const aiResponse: Message = {
+        id: assistantMessage?.id || `ai-${Date.now()}`,
+        role: "assistant",
+        content: aiReply,
+        timestamp: new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit"
+        })
+      };
+      setMessages(prev => [...prev, aiResponse]);
+
+    } catch (error) {
+      console.error('Send message error:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to send message. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsStreaming(false);
+    }
   };
   
   const handleFilesChange = (files: File[]) => {
@@ -358,6 +484,7 @@ export function ChatInterface({
       setExternalFiles(files);
     }
   };
+
   const isEmpty = messages.length === 0 && !isTransitioning;
   const showTransition = isTransitioning;
   
@@ -406,7 +533,7 @@ export function ChatInterface({
           <div style={{
         animationDelay: '0.2s'
       }} className="mt-8 flex flex-wrap max-w-xl animate-fade-in justify-center mx-0 gap-[6px] px-[8px]">
-            {mockProjects.map(project => <button key={project.id} onClick={() => handleSelectProject(project)} className={cn(
+            {projects.map(project => <button key={project.id} onClick={() => handleSelectProject(project)} className={cn(
                 "flex items-center justify-center text-center rounded-lg border px-3 py-2 transition-all duration-200 whitespace-nowrap",
                 selectedProject?.id === project.id 
                   ? "border-accent bg-accent/10 text-muted-foreground"
