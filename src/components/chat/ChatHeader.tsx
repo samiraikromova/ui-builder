@@ -6,9 +6,11 @@ import { CreditsDisplay } from "./CreditsDisplay";
 export interface Project {
   id: string;
   name: string;
+  slug?: string;
   icon: string;
   description: string;
   isPremium?: boolean;
+  systemPrompt?: string;
 }
 
 const mockProjects: Project[] = [
