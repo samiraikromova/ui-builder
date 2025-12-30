@@ -88,7 +88,7 @@ export function AdminLayout({ children, currentPage }: AdminLayoutProps) {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <div className="w-64 border-r border-border bg-surface flex flex-col">
+      <div className="w-64 border-r border-border bg-surface flex flex-col theme-light-purple">
         <div className="p-4 border-b border-border">
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
