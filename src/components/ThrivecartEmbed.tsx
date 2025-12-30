@@ -81,8 +81,11 @@ export function ThrivecartButton({ productId, children, className, userEmail, ..
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     
-    // Build the checkout URL with passthrough data
-    let url = `https://tinder.thrivecart.com/leveraged-creator/${productId}/`
+    // Find the product slug from THRIVECART_PRODUCTS
+    const product = Object.values(THRIVECART_PRODUCTS).find(p => p.productId === productId)
+    
+    // Build the checkout URL with the correct slug
+    let url = `https://tinder.thrivecart.com/${product?.slug || `cb4-starter`}/`
     
     // Add email passthrough if available
     if (userEmail) {
@@ -93,7 +96,7 @@ export function ThrivecartButton({ productId, children, className, userEmail, ..
     if (typeof (window as any).ThriveCart !== 'undefined') {
       try {
         (window as any).ThriveCart.modal.open({
-          account: 'leveraged-creator',
+          account: 'tinder',
           product: productId,
           ...(userEmail && { passthrough: { email: userEmail } })
         })
@@ -120,7 +123,7 @@ export function ThrivecartButton({ productId, children, className, userEmail, ..
       ref={linkRef}
       href="#"
       onClick={handleClick}
-      data-thrivecart-account="leveraged-creator"
+      data-thrivecart-account="tinder"
       data-thrivecart-tpl="v2"
       data-thrivecart-product={productId}
       className={cn(
