@@ -45,7 +45,7 @@ export default function TopUp() {
   const currentCredits = profile?.credits || 0
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background theme-light-purple">
       <ThrivecartEmbed />
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
