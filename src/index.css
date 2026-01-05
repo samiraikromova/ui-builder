@@ -35,10 +35,10 @@
     --muted: 300 5% 20%;
     --muted-foreground: 290 5% 55%;
 
-    /* Accent colors - dark purple for active states */
-    --accent: 310 47% 15%;
+    /* Accent colors - light purple #8e4b9b for active states */
+    --accent: 290 35% 45%;
     --accent-foreground: 0 0% 100%;
-    --accent-hover: 310 47% 20%;
+    --accent-hover: 290 40% 55%;
 
     /* Status colors - matching reference */
     --destructive: 0 64% 37%;
@@ -98,10 +98,10 @@
     --muted: 300 5% 20%;
     --muted-foreground: 290 5% 55%;
 
-    /* Accent colors - dark purple for active states */
-    --accent: 310 47% 15%;
+    /* Accent colors - light purple #8e4b9b for active states */
+    --accent: 290 35% 45%;
     --accent-foreground: 0 0% 100%;
-    --accent-hover: 310 47% 20%;
+    --accent-hover: 290 40% 55%;
 
     /* Status colors - matching reference */
     --destructive: 0 64% 37%;
