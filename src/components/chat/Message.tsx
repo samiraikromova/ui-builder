@@ -75,7 +75,7 @@ interface MessageProps {
 const purpleTheme: any = {
   'code[class*="language-"]': {
     color: '#e0e0e0',
-    background: 'hsl(300, 8%, 12%)',
+    background: '#8e4b9b',
     fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
     fontSize: '0.875rem',
     lineHeight: '1.5',
@@ -89,7 +89,7 @@ const purpleTheme: any = {
   },
   'pre[class*="language-"]': {
     color: '#e0e0e0',
-    background: 'hsl(300, 8%, 12%)',
+    background: '#8e4b9b',
     fontFamily: 'JetBrains Mono, Consolas, Monaco, monospace',
     fontSize: '0.875rem',
     lineHeight: '1.5',
@@ -174,7 +174,7 @@ function CodeBlock({ language, value }: { language: string; value: string }) {
         customStyle={{
           margin: 0,
           borderRadius: 0,
-          background: 'hsl(300, 8%, 12%)',
+          background: '#8e4b9b',
         }}
       >
         {value}
